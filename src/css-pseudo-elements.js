@@ -29,18 +29,34 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         throw new Error("Missing CSS Parser")
     }
     
-    scope.getPseudoElements = function(element, position){ 
-        var host = document.querySelector(element)
-        if (!host){
-            return null
-        }              
-    }
-    
     var _config = {
             styleType: "text/experimental-css",
             pseudoPositions: "before after letter line".split(" "),
             pseudoElementSelectorRegex: /pseudo-element\(\s*(\d+)\s*,\s*[\"\']\s*(\w+)\s*[\"\']\)/i
-        } 
+        }
+        
+        
+    scope.getPseudoElements = function(element, position){
+        var pseudos
+
+        if (!element || element.nodeType !== 1){
+            throw new Error("Invalid parameter 'element'. Expected DOM Node type 1")
+        }
+
+        if (typeof position !== 'string' || _config.pseudoPositions.indexOf(position) < -1){
+            throw new TypeError("Invalid parameter 'position'. Expected one of " + _config.pseudoPositions)
+        }
+
+        if (!element || !element.pseudoElements){
+            pseudos = []
+        }
+        else{
+            pseudos = element.pseudoElements.filter(function(pseudo){
+                return pseudo.position === position
+            })
+        }   
+        return new CSSPseudoElementList(pseudos)
+    } 
     
     /*
         Create a CSSPseudoElement object.
@@ -68,10 +84,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.style = style
     }   
 
-    function CSSPseudoElementList(pseudos){
-        if (pseudos.length){
-            return null
-        }   
+    function CSSPseudoElementList(pseudos){ 
+        pseudos = pseudos || []
 
         return{
             length: pseudos.length,
@@ -140,7 +154,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             // become parasitic. 
             // Attach pseudo elements objects to the host node
             host.pseudoElements = host.pseudoElements || [] 
-            host.pseudoElements.push(pseudoElement)
+            host.pseudoElements.push(pseudoElement) 
             
             console.log(host.pseudoElements) 
         })
