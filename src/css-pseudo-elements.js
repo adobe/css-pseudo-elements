@@ -141,7 +141,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             */
             
             data = parts[1].match(_config.pseudoElementSelectorRegex)
-            if ( data.length < 3){
+            if (!data || !data.length || data.length < 3){
                 return
             }
             
@@ -166,7 +166,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             styles = document.querySelectorAll('style[type="'+ _config.styleType +'"]')
 
         if (!styles || !styles.length){ 
-            throw new Error("No stylesheets found. Expected at least one stylesheet with type= "+ _config.styleType)
+            console.warn("No stylesheets found. Expected at least one stylesheet with type = "+ _config.styleType)
+            return
         }       
         
         Array.prototype.forEach.call(styles, function(stylesheet){
@@ -187,7 +188,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         else{
             console.warn("No pseudo-element rules")
         }
-    }
+    }                                                  
+    
+    scope.CSSPseudoElementsPolyfill = (function(){
+        return {
+            init: init
+        }
+    })()
     
     document.addEventListener("DOMContentLoaded", init)
     
