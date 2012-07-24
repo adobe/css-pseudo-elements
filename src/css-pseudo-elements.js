@@ -165,7 +165,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                                                     
         if (_config.pseudoPositions.indexOf(data[3]) < 0){
             throw new Error("Invalid pseudo-element position: " + data[3] + ". Expected one of: " + _config.pseudoPositions.join(", ") )            
-        }
+        } 
+        
+        // console.log(getQueryFunction("n+1").call(this, 1))
         
         switch( data[1] ){        
             
@@ -185,25 +187,61 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             case "nth-pseudo-element":
             case "nth-last-pseudo-element": 
             
-                if (/\d+?n?(\+\d+)?/.test(data[2])){
-                    cssRule.index = data[2]
+                cssRule.index = data[2]
+                
+                // TODO: Handle case for nth-pseudo(5)
+                if ( /^\d+$/.test(data[2]) ){
+                    
+                    cssRule.queryFn = function(ordinal){
+                        return function(index){
+                            return index === ordinal
+                        }
+                    }(parseInt(data[2], 10))
+                }
+                else if(/\d+?n?(\+\d+)?/.test(data[2])){
+                    cssRule.queryFn = getQueryFunction(data[2]) 
                 } 
-                else{
-                    if (data[2] === "odd"){
-                        cssRule.index = "2n+1"
+                else {
+                    if (data[2] === "odd"){    
+                        cssRule.queryFn =  getQueryFunction("2n+1") 
                     }
-                    else if(data[2] === "even"){
-                        cssRule.index = "2n"   
+                    else if(data[2] === "even"){  
+                        cssRule.queryFn =  getQueryFunction("2n")
                     }
                     else{
                         throw new Error("Invalid pseudo-element index: " + data[2] + ". Expected one of: an+b, odd, even")            
                     }
-                }  
+                }    
+                
             break
         }
         
         return cssRule
-    } 
+    }
+                                      
+    /*
+        Returns a query function from the formula provided.
+        
+        @param {String} formula The formula to convert to a function.
+                                Formula must follow an+b form
+                                
+        @see: http://www.w3.org/TR/css3-selectors/#nth-child-pseudo
+    */
+    function getQueryFunction(formula){
+        var temp,
+            pattern = /(\d+)?(n)(?:([\+-])(\d+))?/,
+            parts = formula.match(pattern),
+            multiplier = parseInt(parts[1], 10) || 1,
+            operation = parts[3] || "+",
+            modifier = parseInt(parts[4], 10) || 0 
+            
+            console.log()
+            
+        return function(index){
+           temp = multiplier * index
+           return (operation === "-")? temp - modifier : temp + modifier
+        }    
+    }
     
     /*
         Create pseudo-elements out of potential CSS Rules.       
@@ -327,16 +365,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }            
         
         cssRules.forEach(function(rule){    
-            console.log(rule)
             try{
-                pseudoRules.push(new new CSSPseudoElementRule(rule))
+                pseudoRules.push(new CSSPseudoElementRule(rule))
             }
             catch(e){}
         })
         
         console.log(pseudoRules)
         
-        // createPseudoElements(pseudoRules)     
+        createPseudoElements(pseudoRules)     
     }                                                  
     
     scope.CSSPseudoElementsPolyfill = (function(){
