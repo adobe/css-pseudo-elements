@@ -51,14 +51,28 @@ test("Create 'before' pseudo elements", function(){
 
     var host = document.querySelector("#host")
     var pseudos = host.pseudoElements
-    //window.getPseudoElements(host, "before")
 
     ok(pseudos, "Host element has pseudo-elements")    
     equal(pseudos.length, 1, "Host has one pseudo-element")
     equal(pseudos[0].position, "before", "Host has one 'before' pseudo-element")
     equal(pseudos[0].ordinal, 1, "Host has one pseudo-element with ordinal 1")
 
-    // teardown()
+    teardown()
 })
 
 module("CSS Pseudo-elements OM")
+
+test("window.getPseudoElements()", function(){
+    setup('#host::pseudo-element(1, "before"){ content: "test"}')
+    CSSPseudoElementsPolyfill.init()
+
+    var host = document.querySelector("#host")
+    var pseudos = window.getPseudoElements(host, "before") 
+    
+    ok(pseudos, "Host has pseudo-elements")
+    equal(pseudos.length, 1, "Host has 1 pseudo element")
+    ok(pseudos.item(0), "CSSPseudoElementList has item() method")
+    equal(pseudos.item(0).position, "before", "First pseudo-element has 'before' position" )
+    equal(pseudos.item(0).ordinal, 1, "First pseudo-element has ordinal 1" )
+    
+})
