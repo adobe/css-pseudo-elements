@@ -32,7 +32,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     var _config = {
             styleType: "text/experimental-css",
             pseudoPositions: "before after letter line".split(" "),
-            pseudoElementSelectorRegex: /pseudo-element\(\s*(\d+)\s*,\s*[\"\']\s*(\w+)\s*[\"\']\)/i
+            pseudoElementSelectorRegex: /((?:nth-(?:last-)?)?pseudo-element)\(\s*([\d\w\+\-]+)\s*,\s*[\"\']\s*(\w+)\s*[\"\']\)/i
         }
         
         
@@ -43,7 +43,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             throw new Error("Invalid parameter 'element'. Expected DOM Node type 1")
         }
 
-        if (typeof position !== 'string' || _config.pseudoPositions.indexOf(position) < -1){
+        if (typeof position !== 'string' || _config.pseudoPositions.indexOf(position) < 0){
             throw new TypeError("Invalid parameter 'position'. Expected one of " + _config.pseudoPositions)
         }
 
@@ -67,13 +67,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */    
     function CSSPseudoElement(ordinal, position, style){
         
-        ordinal = parseInt(ordinal, 10)
-        
-        // ordinals need to be positive numbers, larger than 0
-        if ((isNaN(ordinal) || ordinal < 1)){
-            return
-        }         
-
         // check valid position
         if (_config.pseudoPositions.indexOf(position) < 0){
             return
@@ -129,7 +122,88 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 return match.length ? match.pop() : null
             }
         }
-    }
+    } 
+    
+    function CSSPseudoElementRule(cssRule){  
+        
+        var data, 
+            ordinal,
+            parts = cssRule.selectorText.split("::")
+        
+        // TODO: (cofirm) ignore multiple pseudo elements per selector
+        if (parts.length > 2 || parts[0].indexOf(":") > 0){
+            throw new Error("Invalid pseudo-element selector " + cssRule.selectorText)
+        }  
+
+        /* 
+            Attempt to extract the pseudo ordinal and position
+            data[1] = pseudo-element selector, should be one of:
+                pseudo-element
+                nth-pseudo-element
+                nth-last-pseudo-element                              
+                
+            data[2] = ordinal, should be positive integer
+            
+            data[3] = position, should be one of:
+                before
+                after
+                letter
+                line
+        */
+        data = parts[1].match(_config.pseudoElementSelectorRegex)
+        if (!data || !data.length || data.length < 4){
+            throw new Error("Invalid pseudo-element selector " + cssRule.selectorText)
+        }                                                        
+
+        // the selector for the host element
+        cssRule.hostSelectorText = parts[0]
+        
+        // the selector for the pseudo-element
+        cssRule.pseudoSelectorText = parts[1]  
+        
+        cssRule.pseudoSelectorType = data[1]    
+                                                    
+        if (_config.pseudoPositions.indexOf(data[3]) < 0){
+            throw new Error("Invalid pseudo-element position: " + data[3] + ". Expected one of: " + _config.pseudoPositions.join(", ") )            
+        }
+        
+        switch( data[1] ){        
+            
+            // pseudo-elements have ordinal (integer) and position
+            case "pseudo-element":     
+                ordinal = parseInt(data[2], 10)
+            
+                // ordinals need to be ONLY positive numbers, larger than 0
+                if (/\D/.test(data[2]) || isNaN(ordinal) || ordinal < 1){
+                    throw new Error("Invalid pseudo-element ordinal: " + data[2] + ". Expected positive integer")            
+                }
+            
+                cssRule.ordinal = parseInt(data[2], 10)
+            break
+                                        
+            // nth-pseudo-elements have an index (an+b)|odd|even and position
+            case "nth-pseudo-element":
+            case "nth-last-pseudo-element": 
+            
+                if (/\d+?n?(\+\d+)?/.test(data[2])){
+                    cssRule.index = data[2]
+                } 
+                else{
+                    if (data[2] === "odd"){
+                        cssRule.index = "2n+1"
+                    }
+                    else if(data[2] === "even"){
+                        cssRule.index = "2n"   
+                    }
+                    else{
+                        throw new Error("Invalid pseudo-element index: " + data[2] + ". Expected one of: an+b, odd, even")            
+                    }
+                }  
+            break
+        }
+        
+        return cssRule
+    } 
     
     /*
         Create pseudo-elements out of potential CSS Rules.       
@@ -172,37 +246,63 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             }
             
             pseudoElement = new CSSPseudoElement(data[1], data[2], rule.style) 
-            
-            if (!pseudoElement){
-                return
-            }
-            
-            // become parasitic. 
-            // Attach pseudo elements objects to the host node
-            host.pseudoElements = host.pseudoElements || [] 
-            host.pseudoElements.push(pseudoElement) 
 
-            switch(pseudoElement.position){
-                case "before":
-                    if (host.firstChild){
-                        host.insertBefore(pseudoElement.src, host.firstChild)
-                    }                                                       
-                    else{
-                        host.appendChild(pseudoElement.src)
-                    }                    
-                break
-                
-                case "after":                              
-                    host.appendChild(pseudoElement.src)
-                break
+            // quick check for valid pseudo-element
+            if (pseudoElement.position){           
+                attachPseudoElement(host, pseudoElement)
             }
-            
-            console.log(host.pseudoElements) 
         })
     }
+    
+    /*
+        Attach the pseudo-element to its host element based on the 'position'
+        property
         
+        @param {DOMElement} host The DOM Element that hosts the pseudo-element
+        @param {CSSPseudoElement} pseudoElement The pseudo-element
+    */
+    function attachPseudoElement(host, pseudoElement){ 
+        
+        // become parasitic. 
+        // Attach pseudo elements objects to the host node
+        host.pseudoElements = host.pseudoElements || [] 
+        host.pseudoElements.push(pseudoElement) 
+
+        switch(pseudoElement.position){
+            case "before":
+                if (host.firstChild){
+                    host.insertBefore(pseudoElement.src, host.firstChild)
+                }                                                       
+                else{
+                    host.appendChild(pseudoElement.src)
+                }                    
+            break
+            
+            case "after":                              
+                host.appendChild(pseudoElement.src)
+            break
+        }
+    }
+    
+    /*
+        Filter rules and return likely ::pseudo-element rules
+        
+        @param {Array} rules Array of CSSRule instances
+        @return {Array} filtered array
+        
+    */
+    function getPseudoElementRules(rules){
+        rules = (rules.length) ? rules : []
+        
+        return rules.filter(function(rule){  
+            return rule.selectorText.indexOf("::") > 0
+        })
+    }  
+    
+    
     function init(){ 
-        var pseudoRules = [],
+        var cssRules = [],
+            pseudoRules = [],
             parser = new CSSParser(),
             styles = document.querySelectorAll('style[type="'+ _config.styleType +'"]')
 
@@ -219,16 +319,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         parser.cascade()
             
         // quick filter of rules with pseudo element selectors in them
-        pseudoRules = parser.cssRules.filter(function(rule){  
-            return rule.selectorText.indexOf("::") > 0
+        cssRules = getPseudoElementRules(parser.cssRules)
+        
+        if (!cssRules.length){
+            console.warn("No pseudo-element rules")
+            return
+        }            
+        
+        cssRules.forEach(function(rule){    
+            console.log(rule)
+            try{
+                pseudoRules.push(new new CSSPseudoElementRule(rule))
+            }
+            catch(e){}
         })
         
-        if (pseudoRules.length){
-            createPseudoElements(pseudoRules)     
-        }                                 
-        else{
-            console.warn("No pseudo-element rules")
-        }
+        console.log(pseudoRules)
+        
+        // createPseudoElements(pseudoRules)     
     }                                                  
     
     scope.CSSPseudoElementsPolyfill = (function(){

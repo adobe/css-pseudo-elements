@@ -28,11 +28,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <style type="text/experimental-css">     
 
         div::pseudo-element(1, "before"){
-            content: "before test";
+            content: "before";
         } 
         
         body > div + p::pseudo-element(2, "after"){
-            content: "after test";
+            content: "after";
+        } 
+        
+        div::nth-pseudo-element(2n+1, "before"){
+            content: "overwrite before";
+        }
+        
+        div::nth-last-pseudo-element(2n+1, "before"){
+            content: "overwrite before again";
         }
                 
     </style>
@@ -58,7 +66,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <script type="text/javascript">      
                    
      document.addEventListener("DOMContentLoaded", function(){
-         console.log(window.getPseudoElements(document.body, "before"))
+         // console.log(window.getPseudoElements(document.body, "before"))
      })
     
     </script>
