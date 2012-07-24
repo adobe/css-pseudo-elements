@@ -67,16 +67,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     */    
     function CSSPseudoElement(ordinal, position, style){
         
-        // check valid position
-        if (_config.pseudoPositions.indexOf(position) < 0){
-            return
-        }         
-                                             
         // pseudos need to have either content of flow-from
         // TODO: support flow-from
         if (!style['content'] || style['content'] === "none"){
             return     
-        }        
+        }     
         
         // create the mock pseudo-element as a real element
         var mock = document.createElement("span")
@@ -165,10 +160,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                                                     
         if (_config.pseudoPositions.indexOf(data[3]) < 0){
             throw new Error("Invalid pseudo-element position: " + data[3] + ". Expected one of: " + _config.pseudoPositions.join(", ") )            
-        } 
+        }     
+
+        cssRule.position = data[3]    
         
-        // console.log(getQueryFunction("n+1").call(this, 1))
-        
+        // TODO: make me cleaner!
         switch( data[1] ){        
             
             // pseudo-elements have ordinal (integer) and position
@@ -189,7 +185,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             
                 cssRule.index = data[2]
                 
-                // TODO: Handle case for nth-pseudo(5)
                 if ( /^\d+$/.test(data[2]) ){
                     
                     cssRule.queryFn = function(ordinal){
@@ -224,8 +219,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         
         @param {String} formula The formula to convert to a function.
                                 Formula must follow an+b form
-                                
-        @see: http://www.w3.org/TR/css3-selectors/#nth-child-pseudo
+        @see: http://www.w3.org/TR/css3-selectors/#nth-child-pseudo 
+        @return {Function}
     */
     function getQueryFunction(formula){
         var temp,
@@ -234,9 +229,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             multiplier = parseInt(parts[1], 10) || 1,
             operation = parts[3] || "+",
             modifier = parseInt(parts[4], 10) || 0 
-            
-            console.log()
-            
+
+        // TODO: test the hell out this!            
         return function(index){
            temp = multiplier * index
            return (operation === "-")? temp - modifier : temp + modifier
@@ -253,37 +247,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         @param {Array} cssRules List of potential selectors to create pseudo-elements
     */
     function createPseudoElements(cssRules){ 
-        cssRules.forEach(function(rule){
-            var host, 
-                data,
-                pseudoElement,
-                parts = rule.selectorText.split("::")
+        cssRules.forEach(function(rule){                  
             
-            // TODO: (cofirm) ignore multiple pseudo elements per selector
-            if (parts.length > 2 || parts[0].indexOf(":") > 0){
-                return
-            }
-                                                       
-            // find the alleged pseudo's host element 
-            host = document.querySelector(parts[0])
-                                    
-            // no host, no fun! The host must be a valid node element
-            if (!host || host.nodeType !== 1){ 
-                return
-            }                  
-            
-            /* 
-                attempt to extract the pseudo ordinal and position
-                data[1] = ordinal, should be positive integer
-                data[2] = position, should be string 
-            */
-            
-            data = parts[1].match(_config.pseudoElementSelectorRegex)
-            if (!data || !data.length || data.length < 3){
-                return
-            }
-            
-            pseudoElement = new CSSPseudoElement(data[1], data[2], rule.style) 
+            var pseudoElement = new CSSPseudoElement(rule.ordinal, rule.position, rule.style),
+                host = document.querySelector(rule.hostSelectorText)
+                
+            console.log(pseudoElement, host)
 
             // quick check for valid pseudo-element
             if (pseudoElement.position){           
@@ -304,8 +273,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         // become parasitic. 
         // Attach pseudo elements objects to the host node
         host.pseudoElements = host.pseudoElements || [] 
-        host.pseudoElements.push(pseudoElement) 
-
+        host.pseudoElements.push(pseudoElement)  
+        
         switch(pseudoElement.position){
             case "before":
                 if (host.firstChild){
@@ -371,9 +340,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             catch(e){}
         })
         
-        console.log(pseudoRules)
+        console.log(pseudoRules) 
         
-        createPseudoElements(pseudoRules)     
+        var goodRules = pseudoRules.filter(function(rule){
+            return rule.pseudoSelectorType == "pseudo-element"
+        })
+                            
+        createPseudoElements(goodRules)     
     }                                                  
     
     scope.CSSPseudoElementsPolyfill = (function(){
