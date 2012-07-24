@@ -58,7 +58,7 @@ test("Create 'before' pseudo elements", function(){
     equal(pseudos[0].ordinal, 1, "Host has one pseudo-element with ordinal 1")
 
     teardown()
-})
+}) 
 
 module("CSS Pseudo-elements OM")
 
@@ -73,6 +73,8 @@ test("window.getPseudoElements()", function(){
     equal(pseudos.length, 1, "Host has 1 pseudo element")
     ok(pseudos.item(0), "CSSPseudoElementList has item() method")
     equal(pseudos.item(0).position, "before", "First pseudo-element has 'before' position" )
-    equal(pseudos.item(0).ordinal, 1, "First pseudo-element has ordinal 1" )
+    equal(pseudos.item(0).ordinal, 1, "First pseudo-element has ordinal 1" ) 
+    
+    teardown()
     
 })
