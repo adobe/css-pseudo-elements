@@ -27,35 +27,36 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <meta charset="UTF-8">          
     <style type="text/experimental-css">     
 
-        body{
-            background: red;
-        }
-        
-        body div:last-child()::pseudo-element(1, "before"){
-            content: "fake before";
-        } 
-        
-        body > div+p::pseudo-element(1, "before")::pseudo-element(1, "before"){
-            content: "fake before";
-        }
-
-        body::pseudo-element(1, "before"){
+        div::pseudo-element(1, "before"){
             content: "before test";
         } 
         
         body > div + p::pseudo-element(2, "after"){
             content: "after test";
         }
-
+                
+    </style>
+    <style type="text/css">
+    
+    div{
+        height: 200px;
+        width: 300px;
+        background: lime;
+    }   
+    
+    [data-pseudo-element]{
+        display: inline-block;
+    }
+    
     </style>
     <script type="text/javascript" src="../src/css-parser.js"></script>
     <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
 </head>
 <body> 
-    <div></div>  
+    <div>HOST</div>  
     <p></p>
     <script type="text/javascript">      
-    
+                   
      document.addEventListener("DOMContentLoaded", function(){
          console.log(window.getPseudoElements(document.body, "before"))
      })

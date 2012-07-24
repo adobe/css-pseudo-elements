@@ -77,11 +77,38 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         // check valid position
         if (_config.pseudoPositions.indexOf(position) < 0){
             return
+        }         
+                                             
+        // pseudos need to have either content of flow-from
+        // TODO: support flow-from
+        if (!style['content'] || style['content'] === "none"){
+            return     
+        }        
+        
+        // create the mock pseudo-element as a real element
+        var mock = document.createElement("span")
+        mock.setAttribute("data-pseudo-element","")
+        
+        if (style['content']){
+            mock.textContent = style['content']
         }
         
+        if (style['-webkit-flow-from']){
+            mock.style = '-webkit-flow-from: ' + style['-webkit-flow-from']
+        }
+         
         this.ordinal = ordinal
         this.position = position
-        this.style = style
+        this.style = style 
+        this.src = mock
+        
+        this.addEventListener = function(event, handler){
+            document.addEventListener.call(mock, eventName, handler)
+        } 
+        
+        this.removeEventListener = function(event, handler){
+            document.removeEventListener.call(mock, eventName, handler)
+        }
     }   
 
     function CSSPseudoElementList(pseudos){ 
@@ -103,7 +130,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             }
         }
     }
-                
     
     /*
         Create pseudo-elements out of potential CSS Rules.       
@@ -149,12 +175,27 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             
             if (!pseudoElement){
                 return
-            }       
+            }
             
             // become parasitic. 
             // Attach pseudo elements objects to the host node
             host.pseudoElements = host.pseudoElements || [] 
             host.pseudoElements.push(pseudoElement) 
+
+            switch(pseudoElement.position){
+                case "before":
+                    if (host.firstChild){
+                        host.insertBefore(pseudoElement.src, host.firstChild)
+                    }                                                       
+                    else{
+                        host.appendChild(pseudoElement.src)
+                    }                    
+                break
+                
+                case "after":                              
+                    host.appendChild(pseudoElement.src)
+                break
+            }
             
             console.log(host.pseudoElements) 
         })
