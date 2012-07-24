@@ -161,10 +161,16 @@ Use it responsibly and have fun! ;)
                      return
                  }         
 
-                 var parts = set.split(":")
+                 var key, 
+                     value,
+                     parts = set.split(":")
+                    
 
                  if (parts[0] !== undefined && parts[1] !== undefined) {
-                     properties[parts[0].trim()] = parts[1].trim()
+                     key = parts[0].trim()
+                     value = parts[1].trim().replace(/[\"\']/g, "")
+
+                     properties[key] = value
                  }
              }) 
 
