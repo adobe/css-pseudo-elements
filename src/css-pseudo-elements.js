@@ -364,8 +364,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		
 		// cascade CSS rules where required
 		parser.cascade()
-				
+				                   
 		// extract ::before and ::after pseudo-element CSSRules from real stylesheets
+		// TODO: move me away from here!
 		Array.prototype.forEach.call(styleSheets, function(sheet){      
 		    var realRules = []
 		    
@@ -404,10 +405,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			return rule.pseudoSelectorType == "pseudo-element"
 		})	 
 		
-		var goodRules = parser.cascade(goodRules)
-		
-		console.log(cssRules)
-		console.log(goodRules)
+		goodRules = parser.cascade(goodRules)
 		
 		createPseudoElements(goodRules)
 	}												   
