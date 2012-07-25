@@ -386,7 +386,7 @@ Use it responsibly and have fun! ;)
                     // TODO: externalize this rule
                     this.cssRules = cascadeRules.call(this, this.cssRules)
                     return
-                }
+                }          
                 
                 return cascadeRules.call(this, rules)
             }, 
