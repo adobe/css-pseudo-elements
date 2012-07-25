@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>test multiple afters with new syntax</title>
+  <style type="text/experimental-css">
+    p::pseudo-element(1,'after') {
+      content: "2";
+    }
+    p::pseudo-element(2,'after') {
+      content: "3";
+    }
+  </style>
+</head>
+<body>
+  <p>1</p>
+</body>
+</html>
