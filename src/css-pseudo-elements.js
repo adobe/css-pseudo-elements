@@ -77,6 +77,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		// create the mock pseudo-element as a real element
 		var mock = document.createElement("span")
 		mock.setAttribute("data-pseudo-element","")
+		mock.setAttribute("data-ordinal", ordinal)
 		
 		if (style['content']){
 			mock.textContent = style['content']
@@ -287,48 +288,81 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		@param {Array} cssRules List of potential selectors to create pseudo-elements
 	*/
 	function createPseudoElements(cssRules){ 
-		cssRules.forEach(function(rule){		
-			
-			var pseudoElement = new CSSPseudoElement(rule.ordinal, rule.position, rule.style),
-				host = document.querySelector(rule.hostSelectorText)
-				
-			console.log(pseudoElement, host)
+	    var groups, host, position
+	        
+	    // group rules by hostSelectorText
+	    groups = groupByHostSelector(cssRules)
+	    
+	    for (host in groups){              
+	        for (position in groups[host]){
+	            /* 
+	                Sort the CSSRules ascending by their 'ordinal' property
+	                This helps maintain correct rendering order from the host boundaries 
+	                when appending / prepending based on 'position' property
 
-			// quick check for valid pseudo-element
-			if (pseudoElement.position){		   
-				attachPseudoElement(host, pseudoElement)
-			}
-		})
+	                    before -> preprend: [3,2,1]BOX
+	                    after -> append: BOX[1,2,3]
+                */
+	            groups[host][position].sort(function(a, b){
+                    return a.ordinal - b.ordinal
+                })
+	            
+	            // create and attach pseudo-elements
+	            groups[host][position].forEach(createPseudoElement)
+	        }
+	    }
+	}
+	
+	function createPseudoElement(rule){
+	     var pseudoElement = new CSSPseudoElement(rule.ordinal, rule.position, rule.style),
+				host = document.querySelector(rule.hostSelectorText)
+
+			console.log(rule.hostSelectorText, pseudoElement, host)
+			
+			// become parasitic. 
+    		// Attach pseudo elements objects to the host node
+    		host.pseudoElements = host.pseudoElements || [] 
+    		host.pseudoElements.push(pseudoElement)	 
+
+    		switch(pseudoElement.position){
+    			case "before":
+    				if (host.firstChild){
+    					host.insertBefore(pseudoElement.src, host.firstChild)
+    				}														
+    				else{
+    					host.appendChild(pseudoElement.src)
+    				}					 
+    			break
+
+    			case "after":							   
+    				host.appendChild(pseudoElement.src)
+    			break
+    		}
 	}
 	
 	/*
-		Attach the pseudo-element to its host element based on the 'position'
-		property
-		
-		@param {DOMElement} host The DOM Element that hosts the pseudo-element
-		@param {CSSPseudoElement} pseudoElement The pseudo-element
+	    Group an array of CSSPseudoElementRule items into separate arrays by their hostSelectorText
+	    @param {Array} cssRules Array of CSSPseudoElementRule items
+	    @return {Object} key/value store
+	        @key = {String} hostSelectorText
+	        @value = {Array} array of CSSPseudoElementRule 
 	*/
-	function attachPseudoElement(host, pseudoElement){ 
-		
-		// become parasitic. 
-		// Attach pseudo elements objects to the host node
-		host.pseudoElements = host.pseudoElements || [] 
-		host.pseudoElements.push(pseudoElement)	 
-		
-		switch(pseudoElement.position){
-			case "before":
-				if (host.firstChild){
-					host.insertBefore(pseudoElement.src, host.firstChild)
-				}														
-				else{
-					host.appendChild(pseudoElement.src)
-				}					 
-			break
-			
-			case "after":							   
-				host.appendChild(pseudoElement.src)
-			break
-		}
+	function groupByHostSelector(cssRules){
+	    var groups = {}
+	    
+	    cssRules.forEach(function(rule){		
+		    
+		    if (!groups[rule.hostSelectorText]){
+		        groups[rule.hostSelectorText] = {
+		            before: [],
+		            after: []
+		        }
+            }    
+		    
+            groups[rule.hostSelectorText][rule.position].push(rule)
+        }) 
+	    
+	    return groups
 	}
 	
 	/*
@@ -405,7 +439,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			return rule.pseudoSelectorType == "pseudo-element"
 		})	 
 		
-		goodRules = parser.cascade(goodRules)
+        goodRules = parser.cascade(goodRules)
 		
 		createPseudoElements(goodRules)
 	}												   

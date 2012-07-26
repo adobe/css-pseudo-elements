@@ -26,16 +26,33 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <title>CSS Pseudo-elements Demo</title>
     <meta charset="UTF-8">          
     <style type="text/experimental-css">     
+    
+        div::pseudo-element(3, "before"){
+            content: "b3";  
+            color: blue;
+            display: block;
+        }
 
         div::pseudo-element(1, "before"){
-            content: "before";
-        }  
-        div::pseudo-element(1, 'before'){
-            waaaa: "sssss";
-        }  
+            content: "b1";
+            display: block;   
+        }
+
+        div::pseudo-element(2, "after"){
+            content: "a2";
+            color: yellow;
+            display: block;   
+        }
         
-        body > div + p::pseudo-element(2, "after"){
-            content: "after";
+        div::pseudo-element(3, "after"){
+            content: "a3";
+            color: blue;
+            display: block;   
+        }
+        
+        div::pseudo-element(2, "before"){
+            content: "before2";
+            color: yellow;
         } 
         
         div::nth-pseudo-element(2n+1, "before"){
@@ -53,13 +70,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         height: 200px;
         width: 300px;
         background: lime;
-    }            
+    } 
     
     div::before{
         content: "real";
         color: red;
         display: block;
-    };
+    }
+    
+/*    div::after{
+        content: "a1";
+        color: red;
+        display: block;
+    }  */       
+    
     
     [data-pseudo-element]{
         display: inline-block;
@@ -71,13 +95,5 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 </head>
 <body> 
     <div>HOST</div>  
-    <p></p>
-    <script type="text/javascript">      
-                   
-     document.addEventListener("DOMContentLoaded", function(){
-         // console.log(window.getPseudoElements(document.body, "before"))
-     })
-    
-    </script>
 </body>
 </html>
