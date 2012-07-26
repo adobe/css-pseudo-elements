@@ -33,7 +33,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	    _config = {
 			styleType: "text/experimental-css",
 			pseudoPositions: "before after letter line".split(" "),
-			pseudoElementSelectorRegex: /((?:nth-(?:last-)?)?pseudo-element)\(\s*([\d\w\+\-]+)\s*,\s*[\"\']\s*(\w+)\s*[\"\']\)/i,
+			pseudoElementSelectorRegex: /((?:nth-(?:last-)?)?pseudo-element)\s*\(\s*([\d\w\+\-]+)\s*,\s*[\"\']\s*(\w+)\s*[\"\']\)/i,
 			pseudoElementSelectorRegexSimple: /^(before|after)$/ 
 		}
 		
@@ -193,7 +193,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 				throw new Error("Invalid pseudo-element selector " + cssRule.selectorText)
 			}
 		}
-		
 		
 		// the selector for the host element
 		cssRule.hostSelectorText = parts[0]

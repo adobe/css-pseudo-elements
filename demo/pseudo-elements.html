@@ -27,33 +27,33 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <meta charset="UTF-8">          
     <style type="text/experimental-css">     
     
-        div::pseudo-element(3, "before"){
-            content: "b3";  
-            color: blue;
-            display: block;
-        }
-
         div::pseudo-element(1, "before"){
-            content: "b1";
-            display: block;   
-        }
-
-        div::pseudo-element(2, "after"){
-            content: "a2";
-            color: yellow;
-            display: block;   
-        }
-        
-        div::pseudo-element(3, "after"){
-            content: "a3";
-            color: blue;
+            content: "before1";
             display: block;   
         }
         
         div::pseudo-element(2, "before"){
             content: "before2";
             color: yellow;
-        } 
+        }
+        
+        div::pseudo-element(5, "before"){
+            content: "before5";  
+            color: blue;
+            display: block;
+        }
+
+        div::pseudo-element(2, "after"){
+            content: "after2";
+            color: yellow;
+            display: block;   
+        }
+        
+        div::pseudo-element(5, "after"){
+            content: "after5";
+            color: blue;
+            display: block;   
+        }
         
         div::nth-pseudo-element(2n+1, "before"){
             content: "overwrite before";
@@ -69,23 +69,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     div{
         height: 200px;
         width: 300px;
-        background: lime;
+        background: lightblue;
     } 
     
     div::before{
-        content: "real";
+        content: "the real before to be overwritten";
         color: red;
         display: block;
     }
     
     div::after{
-        content: "a1";
+        content: "after1";
         color: red;
         display: block;
     }         
     
     [data-pseudo-element]{
-        display: inline-block;
+        display: inline;
     }
     
     </style>
