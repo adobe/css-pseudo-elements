@@ -375,7 +375,9 @@ Use it responsibly and have fun! ;)
                  // inline css text and remove comments
                 string = string.replace(/[\n\t]+/g, "").replace(/\/\*[\s\S]*?\*\//g,'').trim()
                 parseBlocks.call(this, string, this.cssRules)
-            },   
+            },
+            
+            parseCSSProperties: parseCSSProperties,
             
             clear: function(){
                 this.cssRules = [];
