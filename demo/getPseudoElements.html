@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<!--
+Copyright (C) 2012 Adobe Systems, Incorporated. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<head>
+    <title>CSS Pseudo-elements Demo</title>
+    <meta charset="UTF-8">          
+    <style type="text/experimental-css">     
+    
+        div::pseudo-element(1, "before"){
+            content: "before1";
+            display: block;   
+        }
+        
+        div::pseudo-element(2, "before"){
+            content: "before2";
+            color: yellow;
+        }
+        
+        div::pseudo-element(5, "before"){
+            content: "before5";  
+            color: blue;
+            display: block;
+        }
+
+        div::pseudo-element(2, "after"){
+            content: "after2";
+            color: yellow;
+            display: block;   
+        }
+        
+        div::pseudo-element(5, "after"){
+            content: "after5";
+            color: blue;
+            display: block;   
+        }
+        
+        div::nth-pseudo-element(2n+1, "before"){
+            content: "overwrite before";
+        }
+        
+        div::nth-last-pseudo-element(2n+1, "before"){
+            content: "overwrite before again";
+        }
+                
+    </style>
+    <style type="text/css">
+    
+    div{
+        height: 200px;
+        width: 300px;
+        background: lightblue;
+    } 
+    
+    div::before{
+        content: "the real before to be overwritten";
+        color: red;
+        display: block;
+    }
+    
+    </style>
+    <script type="text/javascript" src="../src/css-parser.js"></script>
+    <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
+</head>
+<body>   
+    <h1>window.getPseudoElements()</h1>
+    <div>HOST</div> 
+    Check out the response in the console
+    
+    <script type="text/javascript">
+    
+    document.addEventListener("DOMContentLoaded", function(e){
+        
+        var host = document.querySelector('div')
+        var pseudos = window.getPseudoElements(host, "before")
+        
+        console.log(host.pseudoElements, pseudos)
+        
+    })
+    
+    </script> 
+</body>
+</html>
