@@ -23,13 +23,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 !function(scope){		   
 	   
-	scope = scope || window 
-	
+	scope = scope || window
+
 	if (!scope.CSSParser){
 		throw new Error("Missing CSS Parser")
 	}
 	
-	var _config = {
+	var _parser = new CSSParser(),												   
+	    _config = {
 			styleType: "text/experimental-css",
 			pseudoPositions: "before after letter line".split(" "),
 			pseudoElementSelectorRegex: /((?:nth-(?:last-)?)?pseudo-element)\(\s*([\d\w\+\-]+)\s*,\s*[\"\']\s*(\w+)\s*[\"\']\)/i,
@@ -78,8 +79,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		var mock = document.createElement("span")
 		mock.setAttribute("data-pseudo-element","")
 		mock.setAttribute("data-ordinal", ordinal)
-		
-		if (style['content']){
+		                    
+		if (style['content']){                 
 			mock.textContent = style['content']
 		}  
 		
@@ -156,10 +157,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			cssRule.ordinal = 1
 			cssRule.position = data[1]
 			cssRule.pseudoSelectorType = "pseudo-element"
+
+			// pluck out only valid style properties
+			cssRule.style = _parser.parseCSSProperties(cssRule.style.cssText)
 			
-			// the selector for the host element
+			// set the selector for the host element
 			cssRule.hostSelectorText = parts[0] 
-			                
+			
 		    delete cssRule.selectorText   
 		    
 			// rewrite the selector text
@@ -317,8 +321,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	     var pseudoElement = new CSSPseudoElement(rule.ordinal, rule.position, rule.style),
 				host = document.querySelector(rule.hostSelectorText)
 
-			console.log(rule.hostSelectorText, pseudoElement, host)
-			
 			// become parasitic. 
     		// Attach pseudo elements objects to the host node
     		host.pseudoElements = host.pseudoElements || [] 
@@ -379,12 +381,42 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			return rule.selectorText.indexOf("::") > 0
 		})
 	}
+	    
+	/*
+	    Return an array of real CSSRules with ::before and ::after.
+	    These are plucked from the document stylesheets, copied, and delete so they don't apply anymore.
+	    
+	    @return {Array}
+	*/
+	function getRealPseudoElementRules(){
+        var realRules = []
+        
+		Array.prototype.forEach.call(document.styleSheets, function(sheet){      
+		    var ruleIndexToDelete = []
+		    
+		    Array.prototype.forEach.call(sheet.cssRules, function(rule, index){
+    		    if (rule.selectorText.indexOf("::") > 0){
+
+    		        // make a copy of the rule
+                    realRules.push(_parser.doExtend({}, rule))
+
+                    // prepare to delete the original rule so it won't apply anymore
+                    ruleIndexToDelete.push(index)
+    		    }
+    		})             
+
+    		// reversing array in order to delete from the end
+    		ruleIndexToDelete.reverse().forEach(function(ruleIndex){
+        		sheet.removeRule(ruleIndex)
+    		})
+		}) 
+		
+		return realRules   
+	}
 	
 	function init(){ 
 		var cssRules = [],
 			pseudoRules = [],
-			parser = new CSSParser(),												   
-			styleSheets = document.styleSheets,
 			experimentalStyleSheets = document.querySelectorAll('style[type="'+ _config.styleType +'"]')
 
 		if (!experimentalStyleSheets || !experimentalStyleSheets.length){ 
@@ -393,35 +425,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		}		
 		
 		Array.prototype.forEach.call(experimentalStyleSheets, function(sheet){
-			parser.parse(sheet.textContent)
+			_parser.parse(sheet.textContent)
 		})	 
 		
 		// cascade CSS rules where required
-		parser.cascade()
-				                   
-		// extract ::before and ::after pseudo-element CSSRules from real stylesheets
-		// TODO: move me away from here!
-		Array.prototype.forEach.call(styleSheets, function(sheet){      
-		    var realRules = []
-		    
-		    Array.prototype.forEach.call(sheet.cssRules, function(rule, index){
-		        
-    		    if (rule.selectorText.indexOf("::") > 0){
-    		        
-    		        var ruleCopy =  parser.doExtend({}, rule) 
-    		        
-    		        // delete the original rule so it won't apply
-    		        rule.parentStyleSheet.deleteRule(index)
-    		        
-                    realRules.push(ruleCopy)
-    		    }
-    		})
-		    
-			cssRules = cssRules.concat(realRules)	
-		})		
+		_parser.cascade()
+
+        // get real ::before and ::after pseudo-element rules
+ 		cssRules = cssRules.concat(getRealPseudoElementRules())
 		
 		// quick filter of rules with pseudo element selectors in them
-		cssRules = cssRules.concat(getPseudoElementRules(parser.cssRules))
+		cssRules = cssRules.concat(getPseudoElementRules(_parser.cssRules))
 												
 		if (!cssRules.length){
 			console.warn("No pseudo-element rules")
@@ -438,8 +452,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		var goodRules = cssRules.filter(function(rule){
 			return rule.pseudoSelectorType == "pseudo-element"
 		})	 
-		
-        goodRules = parser.cascade(goodRules)
+		 
+		// cascade real and prototype pseudo-element rules
+        goodRules = _parser.cascade(goodRules)
 		
 		createPseudoElements(goodRules)
 	}												   
