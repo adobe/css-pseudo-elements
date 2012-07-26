@@ -69,11 +69,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	*/	  
 	function CSSPseudoElement(ordinal, position, style){
 		
-		// pseudos need to have either content of flow-from
-		// TODO: support flow-from
-		if (!style['content'] || style['content'] === "none"){
-			return	   
-		}	  
+        // pseudos need to have either content of flow-from		
+        if (!style['content'] && !style['-webkit-flow-from']){
+            return
+        }
 		
 		// create the mock pseudo-element as a real element
 		var mock = document.createElement("span")
