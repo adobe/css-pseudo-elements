@@ -375,9 +375,27 @@ Use it responsibly and have fun! ;)
                  // inline css text and remove comments
                 string = string.replace(/[\n\t]+/g, "").replace(/\/\*[\s\S]*?\*\//g,'').trim()
                 parseBlocks.call(this, string, this.cssRules)
+            },  
+                                      
+            /*
+                Parse a single css block declaration and return a CSSRule.
+                
+                @return {CSSRule} if valid css declaration
+                @return {null} if invalid css declaration
+                
+            */
+            parseCSSDeclaration: function(string){
+                var set = []   
+                
+                parseBlocks.call(this, string, set)
+                
+                if (set.length && set.length === 1){
+                    return set.pop()
+                }
+                else{
+                    return null
+                }
             },
-            
-            parseCSSProperties: parseCSSProperties,
             
             clear: function(){
                 this.cssRules = [];

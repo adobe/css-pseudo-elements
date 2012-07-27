@@ -153,22 +153,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		// simple ::before or ::after match. convert it to ::pseudo-element
 		if (data && data[1]){
 			
-			cssRule.ordinal = 1
-			cssRule.position = data[1]
-			cssRule.pseudoSelectorType = "pseudo-element"
-
-			// pluck out only valid style properties
-			cssRule.style = _parser.parseCSSProperties(cssRule.style.cssText)
+			// make a CSSRule out of the real pseudo-element css declaration
+			var newRule = _parser.parseCSSDeclaration(cssRule.cssText) 
+			if (!newRule){
+			    return
+			}         
 			
-			// set the selector for the host element
-			cssRule.hostSelectorText = parts[0] 
+			newRule.ordinal = 1
+			newRule.position = data[1]
+			newRule.pseudoSelectorType = "pseudo-element"
+            newRule.hostSelectorText = parts[0] 
 			
-		    delete cssRule.selectorText   
-		    
 			// rewrite the selector text
-			cssRule.selectorText = getSelectorText(cssRule.hostSelectorText, cssRule.pseudoSelectorType, cssRule.ordinal, cssRule.position)
+			newRule.selectorText = getSelectorText(newRule.hostSelectorText, newRule.pseudoSelectorType, newRule.ordinal, newRule.position)
 			
-			return cssRule
+			return newRule
 		}
 		else{
 			/* 
@@ -393,11 +392,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		    var ruleIndexToDelete = []
 		    
 		    Array.prototype.forEach.call(sheet.cssRules, function(rule, index){
-    		    if (rule.selectorText.indexOf("::") > 0){
-
+    		    if (rule.selectorText.indexOf("::") > 0){   
+    		        
+    		                          
+    		        var x = _parser.doExtend({}, rule)
     		        // make a copy of the rule
-                    realRules.push(_parser.doExtend({}, rule))
-
+                    realRules.push(rule)
+                    
                     // prepare to delete the original rule so it won't apply anymore
                     ruleIndexToDelete.push(index)
     		    }
@@ -405,15 +406,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     		// reversing array in order to delete from the end
     		ruleIndexToDelete.reverse().forEach(function(ruleIndex){
-        		sheet.removeRule(ruleIndex)
+                sheet.removeRule(ruleIndex)
     		})
-		}) 
+		})        
 		
 		return realRules   
 	}
 	
 	function init(){ 
-		var cssRules = [],
+		var cssRules = [], 
 			pseudoRules = [],
 			experimentalStyleSheets = document.querySelectorAll('style[type="'+ _config.styleType +'"]')
 
@@ -430,24 +431,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		_parser.cascade()
 
         // get real ::before and ::after pseudo-element rules
- 		cssRules = cssRules.concat(getRealPseudoElementRules())
-		
+        cssRules = cssRules.concat(getRealPseudoElementRules())  
+        
 		// quick filter of rules with pseudo element selectors in them
 		cssRules = cssRules.concat(getPseudoElementRules(_parser.cssRules))
 												
 		if (!cssRules.length){
 			console.warn("No pseudo-element rules")
 			return
-		}			 
+		}	 
 		
 		cssRules.forEach(function(rule){	
-			try{
+            try{
 				pseudoRules.push(new CSSPseudoElementRule(rule))
-			}
-			catch(e){}
+            }
+            catch(e){}
 		})
-			   
-		var goodRules = cssRules.filter(function(rule){
+		
+		var goodRules = pseudoRules.filter(function(rule){
 			return rule.pseudoSelectorType == "pseudo-element"
 		})	 
 		 
