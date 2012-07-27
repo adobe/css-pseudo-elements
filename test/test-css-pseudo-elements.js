@@ -32,7 +32,6 @@ function setup(cssString){
     var temp = document.createElement('div')
         temp.id = 'host'        
         
-        
     document.querySelector('head').appendChild(style)    
     document.body.appendChild(temp)
 }   
@@ -58,7 +57,23 @@ test("Create 'before' pseudo elements", function(){
     equal(pseudos[0].ordinal, 1, "Host has one pseudo-element with ordinal 1")
 
     teardown()
-}) 
+})
+
+test("CSS Cascade of ::before with ::pseudo-element(1, 'before')", function(){
+    setup('#host::before{content: "before"; color: red} \
+           #host::pseudo-element(1, "before"){ content: "test"; color: green}') 
+
+    CSSPseudoElementsPolyfill.init()
+
+    var host = document.querySelector("#host")
+    var pseudos = host.pseudoElements
+
+    equal(pseudos.length, 1, "Host has one pseudo-element")
+    equal(pseudos[0].style["content"], "test", "::pseudo-element overwrites ::before 'content'")
+    equal(pseudos[0].style["color"], "green", "::pseudo-element overwrites ::before 'color'")
+
+    teardown()
+})
 
 module("CSS Pseudo-elements OM")
 
@@ -76,5 +91,4 @@ test("window.getPseudoElements()", function(){
     equal(pseudos.item(0).ordinal, 1, "First pseudo-element has ordinal 1" ) 
     
     teardown()
-    
-})
+})   
