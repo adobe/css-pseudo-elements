@@ -225,25 +225,26 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			case "nth-pseudo-element":
 			case "nth-last-pseudo-element": 
 			
-				cssRule.index = data[2]
+				cssRule.index = data[2]            
 				
 				if ( /^\d+$/.test(data[2]) ){
 					
 					cssRule.queryFn = function(ordinal){
 						return function(index){
-							return index === ordinal
+							if (index === ordinal) 
+							    return ordinal
 						}
 					}(parseInt(data[2], 10))
 				}
-				else if(/\d+?n?(\+\d+)?/.test(data[2])){
+				else if(/\d+?n?(\+\d+)?/.test(data[2])){  
 					cssRule.queryFn = getQueryFunction(data[2]) 
 				} 
 				else {
 					if (data[2] === "odd"){	   
-						cssRule.queryFn =  getQueryFunction("2n+1") 
+						cssRule.queryFn = getQueryFunction("2n+1")
 					}
-					else if(data[2] === "even"){  
-						cssRule.queryFn =  getQueryFunction("2n")
+					else if(data[2] === "even"){             
+						cssRule.queryFn = getQueryFunction("2n") 
 					}
 					else{
 						throw new Error("Invalid pseudo-element index: " + data[2] + ". Expected one of: an+b, odd, even")			  
@@ -275,7 +276,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		// TODO: test the hell out this!			
 		return function(index){
 		   temp = multiplier * index
-		   return (operation === "-")? temp - modifier : temp + modifier
+
+		   if (operation === "-"){
+		       return temp - modifier
+		   }
+		   else{
+		       return temp + modifier
+		   }
 		}	 
 	}
 	
@@ -413,6 +420,60 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		return realRules   
 	}
 	
+	/*
+
+	*/
+	function processNthPseudoElementRules(pseudoRules, nthRules){
+		
+		// TODO: make grouping a single operation,
+		// group rules by hostSelectorText
+	    groups = groupByHostSelector(pseudoRules) 
+	    
+	    nthRules.forEach(function(nthRule){    
+	        
+            if (groups[nthRule.hostSelectorText]){
+                
+                // get all potential pseudo-element rules that might be matched by this nth-pseudo-rule
+                var potentialRules = groups[nthRule.hostSelectorText][nthRule.position]
+                          
+                // if (!potentialRules.length){
+                //     return
+                // }
+                
+                var matchedRules = matchNthPseudoElementRule(potentialRules, nthRule) 
+                matchedRules.forEach(function(rule){
+                    rule.style = _parser.doExtend({}, rule.style, nthRule.style)
+                })
+                
+                pseudoRules = pseudoRules.concat(matchedRules)
+            }
+	    })   
+		
+		return pseudoRules
+	}
+	    
+	/*
+	    Apply an nth-pseudo-element rule on a pool of pseudo-element rules.
+	    Return an of new pseudo-element for the matching nth-pseudo-element rules.
+	*/
+	function matchNthPseudoElementRule(pseudoRules, nthRule){
+        var x = []
+                     
+        if (nthRule.pseudoSelectorType == "nth-pseudo-element"){
+            pseudoRules.reverse()
+        }  
+
+        pseudoRules.forEach(function(rule, index){
+            var match = pseudoRules[nthRule.queryFn(index + 1)]
+
+            if (match){
+                x.push(match)
+            }        
+        })
+        
+        return x
+	}
+	
 	function init(){ 
 		var cssRules = [], 
 			pseudoRules = [],
@@ -439,22 +500,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		if (!cssRules.length){
 			console.warn("No pseudo-element rules")
 			return
-		}	 
+		}  
 		
 		cssRules.forEach(function(rule){	
             try{
 				pseudoRules.push(new CSSPseudoElementRule(rule))
             }
             catch(e){}
-		})
+		})  
+		
+		var nthRules = pseudoRules.filter(function(rule){
+		    return /nth-(?:last-)?pseudo-element/i.test(rule.pseudoSelectorType)
+		})  
 		
 		var goodRules = pseudoRules.filter(function(rule){
 			return rule.pseudoSelectorType == "pseudo-element"
-		})	 
-		 
-		// cascade real and prototype pseudo-element rules
-        goodRules = _parser.cascade(goodRules)
+		})        
 		
+		goodRules = processNthPseudoElementRules(goodRules, nthRules)
+		
+		// cascade real and prototype pseudo-element rules
+        goodRules = _parser.cascade(goodRules) 
+        
 		createPseudoElements(goodRules)
 	}												   
 	
