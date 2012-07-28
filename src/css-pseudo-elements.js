@@ -231,8 +231,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 					
 					cssRule.queryFn = function(ordinal){
 						return function(index){
-							if (index === ordinal) 
-							    return ordinal
+							if (index + 1 == ordinal){    
+							    return index
+							} 
 						}
 					}(parseInt(data[2], 10))
 				}
@@ -275,9 +276,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 		// TODO: test the hell out this!			
 		return function(index){
-		   temp = multiplier * index
-
-		   if (operation === "-"){
+		   temp = multiplier * index 
+		   
+		   if (operation == "-"){
 		       return temp - modifier
 		   }
 		   else{
@@ -303,18 +304,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	    
 	    for (host in groups){              
 	        for (position in groups[host]){
-	            /* 
-	                Sort the CSSRules ascending by their 'ordinal' property
-	                This helps maintain correct rendering order from the host boundaries 
-	                when appending / prepending based on 'position' property
 
-	                    before -> preprend: [3,2,1]BOX
-	                    after -> append: BOX[1,2,3]
-                */
-	            groups[host][position].sort(function(a, b){
-                    return a.ordinal - b.ordinal
-                })
-	            
 	            // create and attach pseudo-elements
 	            groups[host][position].forEach(createPseudoElement)
 	        }
@@ -347,7 +337,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	}
 	
 	/*
-	    Group an array of CSSPseudoElementRule items into separate arrays by their hostSelectorText
+	    Group an array of CSSPseudoElementRule items into separate arrays by their hostSelectorText and position
+	    Sort rules by ordinal
+	    
 	    @param {Array} cssRules Array of CSSPseudoElementRule items
 	    @return {Object} key/value store
 	        @key = {String} hostSelectorText
@@ -366,7 +358,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             }    
 		    
             groups[rule.hostSelectorText][rule.position].push(rule)
-        }) 
+        })
+        
+        for (host in groups){              
+	        for (position in groups[host]){
+	            /* 
+	                Sort the CSSRules ascending by their 'ordinal' property
+	                This helps maintain correct rendering order from the host boundaries 
+	                when appending / prepending based on 'position' property
+
+	                    before -> preprend: [3,2,1]BOX
+	                    after -> append: BOX[1,2,3]
+                */
+	            groups[host][position].sort(function(a, b){
+                    return a.ordinal - b.ordinal
+                })
+	        }
+	    } 
 	    
 	    return groups
 	}
@@ -401,7 +409,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		    Array.prototype.forEach.call(sheet.cssRules, function(rule, index){
     		    if (rule.selectorText.indexOf("::") > 0){   
     		        
-    		                          
     		        var x = _parser.doExtend({}, rule)
     		        // make a copy of the rule
                     realRules.push(rule)
@@ -435,15 +442,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 
                 // get all potential pseudo-element rules that might be matched by this nth-pseudo-rule
                 var potentialRules = groups[nthRule.hostSelectorText][nthRule.position]
-                          
-                // if (!potentialRules.length){
-                //     return
-                // }
                 
                 var matchedRules = matchNthPseudoElementRule(potentialRules, nthRule) 
+
                 matchedRules.forEach(function(rule){
                     rule.style = _parser.doExtend({}, rule.style, nthRule.style)
-                })
+                })        
                 
                 pseudoRules = pseudoRules.concat(matchedRules)
             }
@@ -458,15 +462,25 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	*/
 	function matchNthPseudoElementRule(pseudoRules, nthRule){
         var x = []
-                     
-        if (nthRule.pseudoSelectorType == "nth-pseudo-element"){
-            pseudoRules.reverse()
-        }  
+        
+        pseudoRules.forEach(function(rule, index){ 
+            
+            var match,
+                pos = nthRule.queryFn(index),  
+                maxIndex = pseudoRules.length - 1
+                
+            if (pos > maxIndex){
+                return
+            }
+                
+            if (nthRule.pseudoSelectorType == "nth-last-pseudo-element"){
+                match = pseudoRules[maxIndex - pos] 
+            }  
+            else{                   
+                match = pseudoRules[pos] 
+            }
 
-        pseudoRules.forEach(function(rule, index){
-            var match = pseudoRules[nthRule.queryFn(index + 1)]
-
-            if (match){
+            if (match){                                    
                 x.push(match)
             }        
         })
@@ -517,7 +531,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			return rule.pseudoSelectorType == "pseudo-element"
 		})        
 		
-		goodRules = processNthPseudoElementRules(goodRules, nthRules)
+        goodRules = processNthPseudoElementRules(goodRules, nthRules)
 		
 		// cascade real and prototype pseudo-element rules
         goodRules = _parser.cascade(goodRules) 

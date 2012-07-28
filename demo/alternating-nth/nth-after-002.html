@@ -2,24 +2,25 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Color even befores</title>
+  <title>Color even afters</title>
   <style type="text/experimental-css">
-    p::pseudo-element (3, 'before') {
-      content: "D";
-    }
-    p::pseudo-element (4, 'before') {
-      content: "C";
-    }
-    p::pseudo-element (7, 'before') {
+    p::pseudo-element (3, 'after') {
       content: "B";
     }
-    p::pseudo-element (9, 'before') {
-      content: "A";
+    p::pseudo-element (4, 'after') {
+      content: "C";
+    }
+    p::pseudo-element (7, 'after') {
+      content: "D";
+    }
+    p::pseudo-element (9, 'after') {
+      content: "E";
     }
     
-    p::nth-last-pseudo-element (even, 'before') {
-      background-color: lime;
-    }
+    p::nth-pseudo-element (even, 'after') {
+      background-color: lightgreen;
+    } 
+    
   </style>
   <style>
     .green {
@@ -30,6 +31,6 @@
   <script type="text/javascript" src="../../src/css-pseudo-elements.js"></script>
 </head>
 <body>
-  <p><span class="green">E</span></p>
+  <p><span class="green">A</span></p>
 </body>
 </html>

@@ -4,24 +4,26 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Color 2nd and 4th befores by index</title>
   <style type="text/experimental-css">
-    p::pseudo-element (3, 'before') {
-      content: "D";
-    }
-    p::pseudo-element (4, 'before') {
-      content: "C";             
-    }
-    p::pseudo-element (7, 'before') {
+    p::pseudo-element (3, 'after') {
       content: "B";
     }
-    p::pseudo-element (9, 'before') {
-      content: "A";
+    p::pseudo-element (4, 'after') {
+      content: "C";
     }
-    p::nth-pseudo-element (2, 'before') {
+    p::pseudo-element (7, 'after') {
+      content: "D";
+    }
+    p::pseudo-element (9, 'after') {
+      content: "E";
+    } 
+    
+    p::nth-pseudo-element (2, 'after') {
       background-color: lightgreen;
-    }        
-    p::nth-pseudo-element (4, 'before') {
+    }          
+    
+    p::nth-pseudo-element (4, 'after') {
       background-color: lightgreen;
-    }        
+    } 
     
   </style>
   <style>
@@ -33,6 +35,6 @@
   <script type="text/javascript" src="../../src/css-pseudo-elements.js"></script>
 </head>
 <body>
-  <p><span class="green">E</span></p>
+  <p><span class="green">A</span></p>
 </body>
 </html>
