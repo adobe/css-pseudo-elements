@@ -75,6 +75,32 @@ test("CSS Cascade of ::before with ::pseudo-element(1, 'before')", function(){
     teardown()
 })
 
+module("::nth-pseudo-element")
+
+test("Get index by query formula", function(){
+                                 
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n").call(this, 0) , 0, "2n")
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n").call(this, 1) , 2, "2n") 
+
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n+1").call(this, 0) , 1, "2n+1")
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n+1").call(this, 1) , 3, "2n+1")
+
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("3n+5").call(this, 1) , 8, "3n+5")
+
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("0n+0").call(this, 1) , 1, "0n+0") 
+                                                                 
+// riding over 2n and 2n+1
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("even").call(this, 0) , 0, "even") 
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("odd").call(this, 0) , 1, "odd") 
+
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("even").call(this, 1) , 2, "even") 
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("odd").call(this, 1) , 3, "odd") 
+
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("1").call(this, 1) , 1)
+equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("3").call(this, 3) , 3)
+
+})
+
 module("CSS Pseudo-elements OM")
 
 test("window.getPseudoElements()", function(){
