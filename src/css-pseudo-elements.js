@@ -444,7 +444,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		
 		// TODO: make grouping a single operation,
 		// group rules by hostSelectorText
-	    groups = groupByHostSelector(pseudoRules) 
+	    groups = groupByHostSelector(pseudoRules)
 	    
 	    nthRules.forEach(function(nthRule){    
 	        
@@ -454,24 +454,37 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 var potentialRules = groups[nthRule.hostSelectorText][nthRule.position]
                 
                 var matchedRules = matchNthPseudoElementRule(potentialRules, nthRule)
-                
+
                 matchedRules.forEach(function(rule){
+                    // augment matching rule with CSS properties from the nth-pseuod rule
                     rule.style = _parser.doExtend({}, rule.style, nthRule.style)
                 })        
-                
+
+                // CSS Cascade will apply later on
                 pseudoRules = pseudoRules.concat(matchedRules)  
             }
 	    })   
-		
+
 		return pseudoRules
 	}
 	    
-	/*
-	    Apply an nth-pseudo-element rule on a pool of pseudo-element rules.
-	    Return an of new pseudo-element for the matching nth-pseudo-element rules.
+	/*       
+	    Find ::pseudo-element rules that match the given ::nth-pseudo or ::nth-last-pseudo rule
+	    The nth-pseudo can match:
+	        a specific index (not ordinal)
+	        odd indexes
+	        even index, or 
+	        indexes which satisfy an 'an+b' formula
+	        
+	    @note CSS indexes start from 1. JavaScript indexes start from 0.
+	    
+	    @param {Array} pseudoRules Array of CSSPseudoElementRule instances
+	    @param {CSSPseudoElementRule} nthRule The rule to match against.
+	    
+	    @return {Array} array of matching rules 
 	*/
 	function matchNthPseudoElementRule(pseudoRules, nthRule){
-        var x = []
+        var matchedRules = []
         
         pseudoRules.forEach(function(rule, index){ 
             
@@ -482,27 +495,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             
             // JS arrays are 0-indexed
             pos = pos - 1
-                
-            if (pos > maxIndex){
-                return
-            }
-
+            
             switch (nthRule.pseudoSelectorType){
                 case "nth-pseudo-element":   
                     match = pseudoRules[pos] 
                 break
                 
-                case "nth-last-pseudo-element":
+                case "nth-last-pseudo-element": 
+                    // matching from the end
                     match = pseudoRules[maxIndex - pos] 
                 break
-            }
+            }            
             
             if (match){                                    
-                x.push(match)
+                matchedRules.push(match)
             }        
         })
         
-        return x
+        return matchedRules
 	}
 	
 	function init(){ 
@@ -514,13 +524,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			console.warn("No stylesheets found. Expected at least one stylesheet with type = "+ _config.styleType)
 			return
 		}		
-		
+	   
+	    // collect rules from experimenta stylesheets
 		Array.prototype.forEach.call(experimentalStyleSheets, function(sheet){
 			_parser.parse(sheet.textContent)
 		})	 
 		
-		// cascade CSS rules where required
-		_parser.cascade()
+        // cascade CSS rules where required
+        _parser.cascade()
 
         // get real ::before and ::after pseudo-element rules
         cssRules = cssRules.concat(getRealPseudoElementRules())  
