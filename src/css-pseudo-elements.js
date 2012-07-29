@@ -259,10 +259,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     		   temp = multiplier * index 
 
     		   if (operation == "-"){
-    		       return temp - modifier - 1
+    		       return temp - modifier
     		   }
     		   else{
-    		       return temp + modifier - 1
+    		       return temp + modifier
     		   }
     		}	 
     	} 
@@ -271,11 +271,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			
 			queryFn = function(ordinal){
 				return function(index){
-					if (index + 1 == ordinal){    
+					if (index == ordinal){    
 					    return index
 					} 
 				}
-			}(parseInt(query, 10))
+			}(parseInt(query, 10)) 
+			
 		}
 		else if(/\d+?n?(\+\d+)?/.test(query)){  
 			queryFn = getQueryFunction(query) 
@@ -474,9 +475,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         
         pseudoRules.forEach(function(rule, index){ 
             
-            var match,
-                pos = nthRule.queryFn(index),  
+            var match,             
+                // expecting 1-indexed array in CSS an+b formula
+                pos = nthRule.queryFn(index + 1),
                 maxIndex = pseudoRules.length - 1
+            
+            // JS arrays are 0-indexed
+            pos = pos - 1
                 
             if (pos > maxIndex){
                 return
