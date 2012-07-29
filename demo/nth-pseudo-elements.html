@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<!--
+Copyright (C) 2012 Adobe Systems, Incorporated. All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html>
+<head>
+    <title>CSS Pseudo-elements Demo</title>
+    <meta charset="UTF-8">          
+    <style type="text/experimental-css">     
+    
+        div::pseudo-element(1, "before"){
+            content: "C";
+        }
+        
+        div::pseudo-element(2, "before"){
+            content: "B";
+        }
+        
+        div::pseudo-element(5, "before"){
+            content: "A";  
+        }  
+        
+        div::pseudo-element(1, "after"){
+            content: "D";
+        }
+
+        div::pseudo-element(2, "after"){
+            content: "E";
+        }
+        
+        div::pseudo-element(5, "after"){
+            content: "F";
+        } 
+        
+
+        div::nth-pseudo-element(1, "before"){
+            color: red;
+        } 
+        
+        div::nth-pseudo-element(2, "before"){
+            color: yellow;
+        }
+        
+        div::nth-pseudo-element(3, "before"){
+            color: blue;
+        }
+        
+        
+
+        div::nth-pseudo-element(1, "after"){
+            color: blue;
+        } 
+        
+        div::nth-pseudo-element(2, "after"){
+            color: yellow;
+        }
+        
+        div::nth-pseudo-element(3, "after"){
+            color: red;
+        }
+                
+    </style>
+    <style type="text/css">
+    
+    div{
+        height: 200px;
+        width: 300px;
+        background: lightblue;
+    } 
+    
+    div::before{
+        color: red;
+    }
+    
+    div::after{
+        color: red;
+    }         
+    
+    [data-pseudo-element]{
+        display: inline;
+    }
+    
+    </style>
+    <script type="text/javascript" src="../src/css-parser.js"></script>
+    <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
+</head>
+<body> 
+    <div>-</div>  
+</body>
+</html>
