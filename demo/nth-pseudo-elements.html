@@ -52,40 +52,38 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         } 
         
 
-        div::nth-pseudo-element(1, "before"){
+        div::nth-pseudo-element(3, "before"){
             color: red;
         } 
         
         div::nth-pseudo-element(2, "before"){
             color: yellow;
-        }
+        }    
         
-        div::nth-pseudo-element(3, "before"){
-            color: blue;
-        }
-        
-        
+        div::nth-pseudo-element(1, "before"){
+            color: blue;   
+        }    
 
         div::nth-pseudo-element(1, "after"){
             color: blue;
-        } 
-        
+        }
+                
         div::nth-pseudo-element(2, "after"){
             color: yellow;
         }
         
         div::nth-pseudo-element(3, "after"){
             color: red;
-        }
+        }  
                 
     </style>
     <style type="text/css">
     
-    div{
-        height: 200px;
+    div,p{
+        padding: 20px;
         width: 300px;
         background: lightblue;
-    } 
+    }
     
     div::before{
         color: red;
@@ -95,15 +93,32 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         color: red;
     }         
     
-    [data-pseudo-element]{
-        display: inline;
+    .red{
+        color: red;
+    }             
+    
+    .yellow{
+        color: yellow;
+    }                
+    
+    .blue{
+        color: blue;
     }
     
     </style>
     <script type="text/javascript" src="../src/css-parser.js"></script>
     <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
 </head>
-<body> 
-    <div>-</div>  
+<body>   
+    <h1>Test ::nth-pseudo-element</h1>
+    <strong>Control</strong>
+    <p>
+        <span class="red">A</span><span class="yellow">B</span><span class="blue">C</span>
+        <span>-</span>
+        <span class="blue">D</span><span class="yellow">E</span><span class="red">F</span>
+    </p> 
+    
+    <strong>Result</strong>
+    <div> - </div>  
 </body>
 </html>

@@ -226,9 +226,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			case "nth-last-pseudo-element": 
 			
 				cssRule.index = data[2] 
-				
-				cssRule.queryFn = getIndexByQuery(data[2])           
-				
+				cssRule.queryFn = getIndexQueryFunction(data[2])           
 				
 			break
 		}
@@ -236,7 +234,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		return cssRule
 	}
 	
-	function getIndexByQuery(query){
+	function getIndexQueryFunction(query){
 	    
 	    var queryFn = function(){}
 	    
@@ -261,14 +259,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     		   temp = multiplier * index 
 
     		   if (operation == "-"){
-    		       return temp - modifier
+    		       return temp - modifier - 1
     		   }
     		   else{
-    		       return temp + modifier
+    		       return temp + modifier - 1
     		   }
     		}	 
-    	}
-	    
+    	} 
+    	
 	    if (/^\d+$/.test(query) ){
 			
 			queryFn = function(ordinal){
@@ -310,6 +308,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	    var groups, host, position
 	        
 	    // group rules by hostSelectorText
+	    // TODO: remvoe this step and merge with nth-pseudo grouping
 	    groups = groupByHostSelector(cssRules)
 	    
 	    for (host in groups){              
@@ -453,13 +452,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 // get all potential pseudo-element rules that might be matched by this nth-pseudo-rule
                 var potentialRules = groups[nthRule.hostSelectorText][nthRule.position]
                 
-                var matchedRules = matchNthPseudoElementRule(potentialRules, nthRule) 
-
+                var matchedRules = matchNthPseudoElementRule(potentialRules, nthRule)
+                
                 matchedRules.forEach(function(rule){
                     rule.style = _parser.doExtend({}, rule.style, nthRule.style)
                 })        
                 
-                pseudoRules = pseudoRules.concat(matchedRules)
+                pseudoRules = pseudoRules.concat(matchedRules)  
             }
 	    })   
 		
@@ -482,14 +481,17 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             if (pos > maxIndex){
                 return
             }
-                
-            if (nthRule.pseudoSelectorType == "nth-last-pseudo-element"){
-                match = pseudoRules[maxIndex - pos] 
-            }  
-            else{                   
-                match = pseudoRules[pos] 
-            }
 
+            switch (nthRule.pseudoSelectorType){
+                case "nth-pseudo-element":   
+                    match = pseudoRules[pos] 
+                break
+                
+                case "nth-last-pseudo-element":
+                    match = pseudoRules[maxIndex - pos] 
+                break
+            }
+            
             if (match){                                    
                 x.push(match)
             }        
@@ -527,10 +529,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		}  
 		
 		cssRules.forEach(function(rule){	
-            // try{
+            try{
 				pseudoRules.push(new CSSPseudoElementRule(rule))
-            // }
-            // catch(e){}
+            }
+            catch(e){}
 		})  
 		
 		var nthRules = pseudoRules.filter(function(rule){
@@ -540,6 +542,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		var goodRules = pseudoRules.filter(function(rule){
 			return rule.pseudoSelectorType == "pseudo-element"
 		})        
+		
+		// cascade real and prototype pseudo-element rules
+        goodRules = _parser.cascade(goodRules)
 		
         goodRules = processNthPseudoElementRules(goodRules, nthRules)
 		
@@ -552,7 +557,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	scope.CSSPseudoElementsPolyfill = (function(){
 		return {
 			init: init,
-			getIndexByQuery: getIndexByQuery
+			getIndexQueryFunction: getIndexQueryFunction
 		}
 	})()
 	
