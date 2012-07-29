@@ -52,28 +52,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         } 
         
 
-        div::nth-pseudo-element(3, "before"){
-            color: red;
+        div::nth-last-pseudo-element(3, "before"){
+            color: blue;
         } 
         
-        div::nth-pseudo-element(2, "before"){
+        div::nth-last-pseudo-element(2, "before"){
             color: yellow;
         }    
         
-        div::nth-pseudo-element(1, "before"){
-            color: blue;   
+        div::nth-last-pseudo-element(1, "before"){
+            color: red;   
         }    
 
-        div::nth-pseudo-element(1, "after"){
-            color: blue;
+        div::nth-last-pseudo-element(1, "after"){
+            color: red;
         }
                 
-        div::nth-pseudo-element(2, "after"){
+        div::nth-last-pseudo-element(2, "after"){
             color: yellow;
         }
         
-        div::nth-pseudo-element(3, "after"){
-            color: red;
+        div::nth-last-pseudo-element(3, "after"){
+            color: blue;
         }  
                 
     </style>
@@ -110,7 +110,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
 </head>
 <body>   
-    <h1>Test ::nth-pseudo-element with indexes</h1>
+    <h1>Test ::nth-last-pseudo-element</h1>
     <strong>Control</strong>
     <p>
         <span class="red">A</span><span class="yellow">B</span><span class="blue">C</span>

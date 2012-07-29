@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Color 2nd and 4th befores by index</title>
+  <title>Color nth-last 1st and 3rd afters by index</title>
   <style type="text/experimental-css">
     p::pseudo-element (3, 'after') {
       content: "B";
@@ -15,13 +15,13 @@
     }
     p::pseudo-element (9, 'after') {
       content: "E";
+    }
+    
+    p::nth-last-pseudo-element (1, 'after') {
+      background-color: lightgreen;
     } 
     
-    p::nth-pseudo-element (2, 'after') {
-      background-color: lightgreen;
-    }          
-    
-    p::nth-pseudo-element (4, 'after') {
+    p::nth-last-pseudo-element (3, 'after') {
       background-color: lightgreen;
     } 
     
@@ -29,7 +29,7 @@
   <style>
     .green {
       background-color: lightgreen;
-    }
+    }        
     strong{
         display:block;
         margin:1em 0 1em;
@@ -38,11 +38,11 @@
   <script type="text/javascript" src="../../src/css-parser.js"></script>
   <script type="text/javascript" src="../../src/css-pseudo-elements.js"></script>
 </head>
-<body> 
-    <strong>Control</strong> 
-    <span class="green">A</span>B<span class="green">C</span>D<span class="green">E</span>
-
-    <strong>Result</strong>    
-    <p><span class="green">A</span></p>
+<body>      
+  <strong>Control</strong> 
+  <span class="green">A</span>B<span class="green">C</span>D<span class="green">E</span>
+  
+  <strong>Result</strong>  
+  <p><span class="green">A</span></p>
 </body>
 </html>
