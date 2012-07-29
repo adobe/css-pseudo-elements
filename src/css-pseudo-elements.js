@@ -225,68 +225,78 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			case "nth-pseudo-element":
 			case "nth-last-pseudo-element": 
 			
-				cssRule.index = data[2]            
+				cssRule.index = data[2] 
 				
-				if ( /^\d+$/.test(data[2]) ){
-					
-					cssRule.queryFn = function(ordinal){
-						return function(index){
-							if (index + 1 == ordinal){    
-							    return index
-							} 
-						}
-					}(parseInt(data[2], 10))
-				}
-				else if(/\d+?n?(\+\d+)?/.test(data[2])){  
-					cssRule.queryFn = getQueryFunction(data[2]) 
-				} 
-				else {
-					if (data[2] === "odd"){	   
-						cssRule.queryFn = getQueryFunction("2n+1")
-					}
-					else if(data[2] === "even"){             
-						cssRule.queryFn = getQueryFunction("2n") 
-					}
-					else{
-						throw new Error("Invalid pseudo-element index: " + data[2] + ". Expected one of: an+b, odd, even")			  
-					}
-				}	 
+				cssRule.queryFn = getIndexByQuery(data[2])           
+				
 				
 			break
 		}
 		
 		return cssRule
 	}
-									  
-	/*
-		Returns a query function from the formula provided.
-		
-		@param {String} formula The formula to convert to a function.
-								Formula must follow an+b form
-		@see: http://www.w3.org/TR/css3-selectors/#nth-child-pseudo 
-		@return {Function}
-	*/
-	function getQueryFunction(formula){
-		var temp,
-			pattern = /(\d+)?(n)(?:([\+-])(\d+))?/,
-			parts = formula.match(pattern),
-			multiplier = parseInt(parts[1], 10) || 1,
-			operation = parts[3] || "+",
-			modifier = parseInt(parts[4], 10) || 0 
-
-		// TODO: test the hell out this!			
-		return function(index){
-		   temp = multiplier * index 
-		   
-		   if (operation == "-"){
-		       return temp - modifier
-		   }
-		   else{
-		       return temp + modifier
-		   }
-		}	 
-	}
 	
+	function getIndexByQuery(query){
+	    
+	    var queryFn = function(){}
+	    
+	    /*
+    		Returns a query function from the formula provided.
+
+    		@param {String} formula The formula to convert to a function.
+    								Formula must follow an+b form
+    		@see: http://www.w3.org/TR/css3-selectors/#nth-child-pseudo 
+    		@return {Function}
+    	*/
+    	function getQueryFunction(formula){
+    		var temp,
+    			pattern = /(\d+)?(n)(?:([\+-])(\d+))?/,
+    			parts = formula.match(pattern),
+    			multiplier = parseInt(parts[1], 10) || 1,
+    			operation = parts[3] || "+",
+    			modifier = parseInt(parts[4], 10) || 0 
+
+    		// TODO: test the hell out this!			
+    		return function(index){
+    		   temp = multiplier * index 
+
+    		   if (operation == "-"){
+    		       return temp - modifier
+    		   }
+    		   else{
+    		       return temp + modifier
+    		   }
+    		}	 
+    	}
+	    
+	    if (/^\d+$/.test(query) ){
+			
+			queryFn = function(ordinal){
+				return function(index){
+					if (index + 1 == ordinal){    
+					    return index
+					} 
+				}
+			}(parseInt(query, 10))
+		}
+		else if(/\d+?n?(\+\d+)?/.test(query)){  
+			queryFn = getQueryFunction(query) 
+		} 
+		else {
+			if (query === "odd"){	   
+				queryFn = getQueryFunction("2n+1")
+			}
+			else if(query === "even"){             
+				queryFn = getQueryFunction("2n") 
+			}
+			else{
+				throw new Error("Invalid pseudo-element index: " + query + ". Expected one of: an+b, odd, even")			  
+			}
+		}
+		
+		return queryFn
+	}
+									  
 	/*
 		Create pseudo-elements out of potential CSS Rules.		 
 		
@@ -517,10 +527,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		}  
 		
 		cssRules.forEach(function(rule){	
-            try{
+            // try{
 				pseudoRules.push(new CSSPseudoElementRule(rule))
-            }
-            catch(e){}
+            // }
+            // catch(e){}
 		})  
 		
 		var nthRules = pseudoRules.filter(function(rule){
@@ -541,7 +551,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	
 	scope.CSSPseudoElementsPolyfill = (function(){
 		return {
-			init: init
+			init: init,
+			getIndexByQuery: getIndexByQuery
 		}
 	})()
 	
