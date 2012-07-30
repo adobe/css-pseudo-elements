@@ -68,6 +68,12 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         content: "the real before to be overwritten";
         color: red;
         display: block;
+    } 
+    
+    div::after{
+        content: "after1";
+        color: red;
+        display: block;
     }
     
     </style>
@@ -84,9 +90,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     document.addEventListener("DOMContentLoaded", function(e){
         
         var host = document.querySelector('div')
-        var pseudos = window.getPseudoElements(host, "before")
-        
-        console.log(host.pseudoElements, pseudos)
+        var pseudoList = window.getPseudoElements(host, "before")
+        console.dir(pseudoList)
         
     })
     
