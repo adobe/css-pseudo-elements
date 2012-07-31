@@ -27,14 +27,29 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <meta charset="UTF-8">          
     <style type="text/experimental-css">     
     
-        div::pseudo-element(1, "before"){
+        body::pseudo-element(1, "before"){
             -webkit-flow-from: article;
             display: block;
             width: 50%;
-            height: 50%;    
+            height: 4.8em;    
             outline: 1px solid green;
         }
          
+        body::pseudo-element(2, "before"){
+            -webkit-flow-from: article;
+            display: block;
+            width: 50%;
+            height: 3.6em;  
+            outline: 1px solid green;
+        }
+        body::pseudo-element(1, "after"){
+            -webkit-flow-from: article;
+            display: block;
+            width: 50%;
+            height: auto;    
+            outline: 1px solid green;
+        }
+
     </style>
     <style type="text/css">
     
@@ -42,10 +57,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         -webkit-flow-into: article;   
     }
     
-    div{
-        height: 200px;
-        width: 300px;
-        background: lightblue;
+    body{
+        width: 30%;
     } 
     
     </style>
@@ -53,7 +66,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
 </head>
 <body>    
-    <article>CSS Regions are a prime candidate for pseudo-elements. This content is rendered in a pseudo-element.</article>
-    <div>HOST</div>  
+    <article>CSS Regions are a prime candidate for pseudo-elements. This content is rendered in a series of pseudo-element boxes on the body element. No other elements were used for this region chain.</article>
 </body>
 </html>
