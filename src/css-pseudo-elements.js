@@ -92,8 +92,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		mock.setAttribute("style", cssText.join(";") )
 		 
 		this.ordinal = ordinal
-		this.position = position 
-		
+		this.position = position
+		this.style = style 
 		this.src = mock
 		
         return this
