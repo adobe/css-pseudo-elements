@@ -39,24 +39,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		
 		
 	scope.getPseudoElements = function(element, position){
-		var pseudos
-
+	    var pseudos 
+	    
 		if (!element || element.nodeType !== 1){
 			throw new Error("Invalid parameter 'element'. Expected DOM Node type 1")
 		}
 
 		if (typeof position !== 'string' || _config.pseudoPositions.indexOf(position) < 0){
 			throw new TypeError("Invalid parameter 'position'. Expected one of " + _config.pseudoPositions)
-		}
-
-		if (!element || !element.pseudoElements){
-			pseudos = []
-		}
-		else{
-			pseudos = element.pseudoElements.filter(function(pseudo){
-				return pseudo.position === position
-			})
-		}	
+		}    
+		
+		if (!element.pseudoElements){
+		    pseudos = []
+		}                  
+		
+        pseudos = element.pseudoElements.filter(function(pseudo){
+             return pseudo.position === position
+         })                                  
+         
 		return new CSSPseudoElementList(pseudos)
 	} 
 	
@@ -79,6 +79,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		var mock = document.createElement("span")
 		mock.setAttribute("data-pseudo-element","")
 		mock.setAttribute("data-ordinal", ordinal)
+		mock.setAttribute("data-position", position)
 		                    
 		if (style['content']){                 
 			mock.textContent = style['content']
@@ -91,39 +92,42 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		mock.setAttribute("style", cssText.join(";") )
 		 
 		this.ordinal = ordinal
-		this.position = position
-		this.style = style 
+		this.position = position 
+		
 		this.src = mock
+		
+        return this
 	}
 
-	CSSPseudoElement.prototype.addEventListener = function(eventName, handler){
-		document.addEventListener.call(this.src, eventName, handler)
-	} 
-	
-	CSSPseudoElement.prototype.removeEventListener = function(eventName, handler){
-		document.removeEventListener.call(this.src, eventName, handler)
-	}
+    // CSSPseudoElement.prototype.addEventListener = function(eventName, handler){
+    //  document.addEventListener.call(this.src, eventName, handler)
+    // } 
+    // 
+    // CSSPseudoElement.prototype.removeEventListener = function(eventName, handler){
+    //  document.removeEventListener.call(this.src, eventName, handler)
+    // }
 	
 	
 	function CSSPseudoElementList(pseudos){ 
-		pseudos = pseudos || []
-
-		return{
-			length: pseudos.length,
-			
-			item: function(index){
-				return pseudos[index] || null
-			},	   
-			
-			getByOrdinalAndPosition: function(ordinal, position){
-				var match = pseudos.filter(function(pseudo){
-					return pseudo.ordinal === ordinal && pseudo.position === position
-				}) 
-
-				return match.length ? match.pop() : null
-			}
-		}
+	    pseudos.forEach(function(pseudo, index){  
+	        console.log(index, pseudos[index])
+	        this[index] = pseudos[index]        
+	    })      
+	    
+	    return this
 	} 
+	
+	CSSPseudoElementList.prototype.item = function(index){
+	    
+	}                             
+	
+	CSSPseudoElementList.prototype.getByOrdinalAndPosition = function(ordinal, position){
+	    var match = Array.prototype.filter.call(pseudos, function(pseudo){
+			return pseudo.ordinal === ordinal && pseudo.position === position
+		}) 
+
+		return match.length ? match.pop() : null
+	}
 	
 	function CSSPseudoElementRule(cssRule){
 	             
