@@ -81,9 +81,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
 </head>
 <body>   
-    <h1>window.getPseudoElements()</h1>
+    <h1>CSS Pseudo-elements - CSS OM</h1>
+    <p>Check out the page source and browser console output.</p>
+    
     <div>HOST</div> 
-    Check out the response in the console
     
     <script type="text/javascript">
     
@@ -91,8 +92,19 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         
         var host = document.querySelector('div')
         var pseudoList = window.getPseudoElements(host, "before")
-        console.dir(pseudoList)
         
+        console.log("has CSSPseudoElementList: ", pseudoList instanceof CSSPseudoElementList)
+        console.log("has CSSPseudoElement: ", pseudoList.getByOrdinalAndPosition(1, "before") instanceof CSSPseudoElement)
+        
+        console.log("CSSPseudoElementList.length: ", pseudoList.length)
+        console.log("CSSPseudoElementList.item(0): ", pseudoList.item(0))
+        console.log("CSSPseudoElementList.getByOrdinalAndPosition(1, \'before\'): ", pseudoList.getByOrdinalAndPosition(1, "before"))
+        
+        console.log('pseudo-elements:')
+         
+        for (var i = 0, len = pseudoList.length; i < len; i++){
+            console.log(pseudoList[i])
+        }
     })
     
     </script> 

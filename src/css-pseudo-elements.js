@@ -98,36 +98,28 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		
         return this
 	}
-
-    // CSSPseudoElement.prototype.addEventListener = function(eventName, handler){
-    //  document.addEventListener.call(this.src, eventName, handler)
-    // } 
-    // 
-    // CSSPseudoElement.prototype.removeEventListener = function(eventName, handler){
-    //  document.removeEventListener.call(this.src, eventName, handler)
-    // }
 	
-	
-	function CSSPseudoElementList(pseudos){ 
-	    pseudos.forEach(function(pseudo, index){  
-	        console.log(index, pseudos[index])
-	        this[index] = pseudos[index]        
-	    })      
+	function CSSPseudoElementList(pseudos){
+	    var self = this 
 	    
-	    return this
+	    pseudos.forEach(function(pseudo, index){  
+	        self[index] = pseudos[index]        
+	    })
+	    
+	    this.length = pseudos.length      
 	} 
 	
-	CSSPseudoElementList.prototype.item = function(index){
-	    
-	}                             
-	
-	CSSPseudoElementList.prototype.getByOrdinalAndPosition = function(ordinal, position){
-	    var match = Array.prototype.filter.call(pseudos, function(pseudo){
-			return pseudo.ordinal === ordinal && pseudo.position === position
-		}) 
-
-		return match.length ? match.pop() : null
-	}
+    CSSPseudoElementList.prototype.item = function(index){
+        return this[index] || null
+    }                             
+    
+    CSSPseudoElementList.prototype.getByOrdinalAndPosition = function(ordinal, position){
+        var match = Array.prototype.filter.call(this, function(pseudo){
+            return pseudo.ordinal === ordinal && pseudo.position === position
+        }) 
+    
+        return match.length ? match.pop() : null
+    }    
 	
 	function CSSPseudoElementRule(cssRule){
 	             
@@ -582,7 +574,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         goodRules = _parser.cascade(goodRules) 
         
 		createPseudoElements(goodRules)
-	}												   
+	}
+	
+	scope.CSSPseudoElementList = CSSPseudoElementList
+	scope.CSSPseudoElement = CSSPseudoElement
 	
 	scope.CSSPseudoElementsPolyfill = (function(){
 		return {
