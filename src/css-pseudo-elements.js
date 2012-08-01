@@ -39,24 +39,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		
 		
 	scope.getPseudoElements = function(element, position){
-		var pseudos
-
+	    var pseudos 
+	    
 		if (!element || element.nodeType !== 1){
 			throw new Error("Invalid parameter 'element'. Expected DOM Node type 1")
 		}
 
 		if (typeof position !== 'string' || _config.pseudoPositions.indexOf(position) < 0){
 			throw new TypeError("Invalid parameter 'position'. Expected one of " + _config.pseudoPositions)
-		}
-
-		if (!element || !element.pseudoElements){
-			pseudos = []
-		}
-		else{
-			pseudos = element.pseudoElements.filter(function(pseudo){
-				return pseudo.position === position
-			})
-		}	
+		}    
+		
+		if (!element.pseudoElements){
+		    pseudos = []
+		}                  
+		
+        pseudos = element.pseudoElements.filter(function(pseudo){
+             return pseudo.position === position
+         })                                  
+         
 		return new CSSPseudoElementList(pseudos)
 	} 
 	
@@ -79,6 +79,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		var mock = document.createElement("span")
 		mock.setAttribute("data-pseudo-element","")
 		mock.setAttribute("data-ordinal", ordinal)
+		mock.setAttribute("data-position", position)
 		                    
 		if (style['content']){                 
 			mock.textContent = style['content']
@@ -94,36 +95,31 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		this.position = position
 		this.style = style 
 		this.src = mock
-	}
-
-	CSSPseudoElement.prototype.addEventListener = function(eventName, handler){
-		document.addEventListener.call(this.src, eventName, handler)
-	} 
-	
-	CSSPseudoElement.prototype.removeEventListener = function(eventName, handler){
-		document.removeEventListener.call(this.src, eventName, handler)
+		
+        return this
 	}
 	
-	
-	function CSSPseudoElementList(pseudos){ 
-		pseudos = pseudos || []
-
-		return{
-			length: pseudos.length,
-			
-			item: function(index){
-				return pseudos[index] || null
-			},	   
-			
-			getByOrdinalAndPosition: function(ordinal, position){
-				var match = pseudos.filter(function(pseudo){
-					return pseudo.ordinal === ordinal && pseudo.position === position
-				}) 
-
-				return match.length ? match.pop() : null
-			}
-		}
+	function CSSPseudoElementList(pseudos){
+	    var self = this 
+	    
+	    pseudos.forEach(function(pseudo, index){  
+	        self[index] = pseudos[index]        
+	    })
+	    
+	    this.length = pseudos.length      
 	} 
+	
+    CSSPseudoElementList.prototype.item = function(index){
+        return this[index] || null
+    }                             
+    
+    CSSPseudoElementList.prototype.getByOrdinalAndPosition = function(ordinal, position){
+        var match = Array.prototype.filter.call(this, function(pseudo){
+            return pseudo.ordinal === ordinal && pseudo.position === position
+        }) 
+    
+        return match.length ? match.pop() : null
+    }    
 	
 	function CSSPseudoElementRule(cssRule){
 	             
@@ -578,7 +574,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         goodRules = _parser.cascade(goodRules) 
         
 		createPseudoElements(goodRules)
-	}												   
+	}
+	
+	scope.CSSPseudoElementList = CSSPseudoElementList
+	scope.CSSPseudoElement = CSSPseudoElement
 	
 	scope.CSSPseudoElementsPolyfill = (function(){
 		return {

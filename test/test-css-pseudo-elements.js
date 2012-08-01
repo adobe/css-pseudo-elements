@@ -1,3 +1,26 @@
+function createPseudoElements(cssString){
+    var style = document.createElement('style')
+        style.type = "text/experimental-css"
+        style.id = "style"
+        style.textContent = cssString
+        
+    var temp = document.createElement('div')
+        temp.id = 'host'        
+        
+    document.querySelector('head').appendChild(style)    
+    document.body.appendChild(temp)
+} 
+
+function removePseudoElements(){
+    var elements = document.querySelectorAll("#style, #host")
+    Array.prototype.forEach.call(elements, function(el){
+        el.parentNode.removeChild(el)
+    })
+}                                                            
+
+function setup(cssString) { return createPseudoElements.call(this, cssString) } 
+function teardown() {return removePseudoElements.call(this) }
+
 module("Parse CSS Pseudo-elements")  
 
 test("Parser exists", function(){       
@@ -23,25 +46,6 @@ test("Parse ::pseudo-element cascade", function(){
 
 module("Create CSS Pseudo-elements")
 
-function setup(cssString){
-    var style = document.createElement('style')
-        style.type = "text/experimental-css"
-        style.id = "style"
-        style.textContent = cssString
-        
-    var temp = document.createElement('div')
-        temp.id = 'host'        
-        
-    document.querySelector('head').appendChild(style)    
-    document.body.appendChild(temp)
-}   
-
-function teardown(){
-    var elements = document.querySelectorAll("#style, #host")
-    Array.prototype.forEach.call(elements, function(el){
-        el.parentNode.removeChild(el)
-    })
-}
 
 test("Create 'before' pseudo elements", function(){
     setup('#host::pseudo-element(1, "before"){ content: "test"}') 
@@ -101,20 +105,36 @@ equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("3").call(this, 3) , 3)
 
 })
 
-module("CSS Pseudo-elements OM")
+module("Pseudo-elements CSS OM", {
+    setup: function(){
+        createPseudoElements('#host::pseudo-element(1, "before"){ content: "test"}')
+        CSSPseudoElementsPolyfill.init() 
+    },
+       
+    teardown: function(){
+        removePseudoElements()
+    }
+}) 
+
+test("CSSPseudoElementList", function(){
+    var host = document.querySelector("#host")
+    var pseudos = window.getPseudoElements(host, "before")
+
+    ok(pseudos instanceof CSSPseudoElementList, "window.getPseudoElements() should return a CSSPseudoElementList")
+    equal(pseudos.length, 1, "CSSPseudoElementList should have a single item")
+
+    equal(typeof pseudos.item, 'function', "CSSPseudoElementList should have item() method")
+    ok(pseudos.item(0) instanceof CSSPseudoElement, "CSSPseudoElementList.item(0) should be a CSSPseudoElement")
+    
+    equal(typeof pseudos.getByOrdinalAndPosition, 'function', "CSSPseudoElementList should have getByOrdinalAndPosition() method")
+    ok(pseudos.getByOrdinalAndPosition(1, 'before') instanceof CSSPseudoElement, "CSSPseudoElementList.getByOrdinalAndPosition(0) should be a CSSPseudoElement")
+})
 
 test("window.getPseudoElements()", function(){
-    setup('#host::pseudo-element(1, "before"){ content: "test"}')
-    CSSPseudoElementsPolyfill.init()
+    equal(typeof window.getPseudoElements, "function", "window.getPseudoElements() should be a function")
 
     var host = document.querySelector("#host")
     var pseudos = window.getPseudoElements(host, "before") 
     
-    ok(pseudos, "Host has pseudo-elements")
-    equal(pseudos.length, 1, "Host has 1 pseudo element")
-    ok(pseudos.item(0), "CSSPseudoElementList has item() method")
-    equal(pseudos.item(0).position, "before", "First pseudo-element has 'before' position" )
-    equal(pseudos.item(0).ordinal, 1, "First pseudo-element has ordinal 1" ) 
-    
-    teardown()
+    ok(pseudos instanceof CSSPseudoElementList, "window.getPseudoElements() should return a CSSPseudoElementList")
 })   
