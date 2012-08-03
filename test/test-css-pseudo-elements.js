@@ -27,59 +27,81 @@ test("Parser exists", function(){
     ok(window.CSSParser, "The parser is available")
 })   
 
-test("Parse basic ::pseudo-element", function(){
+test("Parse basic pseudo-element", function(){
     var parser = new CSSParser()
-    parser.parse("body::pseudo-element(1, 'before'){ content: 'test'} ") 
+    parser.parse("body::before[1]{ content: 'test'} ") 
                         
     equal(parser.cssRules.length, 1, "Parse one rule");
-    equal(parser.cssRules[0].selectorText, "body::pseudo-element(1, 'before')", "Parse selector");
+    equal(parser.cssRules[0].selectorText, "body::before[1]", "Parse selector");
 })
 
 test("Parse ::pseudo-element cascade", function(){
     var parser = new CSSParser()
-    parser.parse("body::pseudo-element(2, 'after'){ content: 'test'}; body::pseudo-element(2, 'after'){  color: red } ") 
+    parser.parse("body::before[2]{ content: 'test'}; body::before[2]{  color: red } ") 
     parser.cascade()
                         
     equal(parser.cssRules.length, 1, "Parse one rule");
     equal(parser.cssRules[0].style.color, "red" , "Parse two rules");
 })
 
-module("Create CSS Pseudo-elements")
+module("Create CSS Pseudo-elements", {
+    setup: function(){
+        createPseudoElements('\
+            #host::before{content: "test"; color: green} \
+            #host::before[1]{ content: "before1"}\
+            #host::before[2]{ content: "before2"}\
+            #host::after{ content: "test"; color: green}\
+            #host::after[1]{ content: "after1"}\
+            #host::after[2]{ content: "after2"}\
+         ')
+        
+        CSSPseudoElementsPolyfill.init() 
+    },
+    
+    teardown: function(){
+        removePseudoElements()
+    }
+})
 
-
-test("Create 'before' pseudo elements", function(){
-    setup('#host::pseudo-element(1, "before"){ content: "test"}') 
-
-    CSSPseudoElementsPolyfill.init()
-
+test("Create pseudo elements", function(){
     var host = document.querySelector("#host")
-    var pseudos = host.pseudoElements
+    var pseudos = host.querySelectorAll("[data-pseudo-element]")
+    
+    ok(pseudos, "Host should have pseudo-elements")    
+    equal(pseudos.length, 4, "Host should have 4 pseudo-elements")
+})
 
-    ok(pseudos, "Host element has pseudo-elements")    
-    equal(pseudos.length, 1, "Host has one pseudo-element")
-    equal(pseudos[0].position, "before", "Host has one 'before' pseudo-element")
-    equal(pseudos[0].ordinal, 1, "Host has one pseudo-element with ordinal 1")
+test("Pseudo-elements type", function(){
+    var host = document.querySelector("#host")
+    var pseudos = host.querySelectorAll("[data-pseudo-element]")
+    
+    equal(pseudos[0].getAttribute('data-type'), "before", "First pseudo-element should be of type 'before'")
+    equal(pseudos[pseudos.length-1].getAttribute('data-type'), "after", "Last pseudo-element should be of type 'after'")
+}) 
+
+test("Pseudo-elements ordinal", function(){
+    var host = document.querySelector("#host")
+    var pseudos = host.querySelectorAll("[data-pseudo-element]")
+
+    equal(pseudos[0].getAttribute('data-ordinal'), "2", "First 'before' pseudo-element should have ordinal 2")
+    equal(pseudos[1].getAttribute('data-ordinal'), "1", "Second 'before' pseudo-element should have ordinal 1")
+    equal(pseudos[2].getAttribute('data-ordinal'), "1", "First 'after' pseudo-element should have ordinal 1")
+    equal(pseudos[3].getAttribute('data-ordinal'), "2", "Second 'after' pseudo-element should have ordinal 2")
 
     teardown()
 })
 
-test("CSS Cascade of ::before with ::pseudo-element(1, 'before')", function(){
-    setup('#host::before{content: "before"; color: red} \
-           #host::pseudo-element(1, "before"){ content: "test"; color: green}') 
-
-    CSSPseudoElementsPolyfill.init()
-
+test("CSS Cascade with native pseudo-elements", function(){
     var host = document.querySelector("#host")
-    var pseudos = host.pseudoElements
-
-    equal(pseudos.length, 1, "Host has one pseudo-element")
-    equal(pseudos[0].style["content"], "test", "::pseudo-element overwrites ::before 'content'")
-    equal(pseudos[0].style["color"], "green", "::pseudo-element overwrites ::before 'color'")
+    var pseudos = host.querySelectorAll("[data-pseudo-element]")
+    
+    equal(pseudos[1].innerHTML, "before1", "First 'before' pseudo-element should overwrite native ::before content with 'before1")
+    equal(pseudos[1].style["color"], "green", "First 'before' pseudo-element should have green color")
 
     teardown()
 })
 
-module("::nth-pseudo-element")
+module("::nth-pseudo")
 
 test("Get index by query formula", function(){
                                  
@@ -107,7 +129,7 @@ equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("3").call(this, 3) , 3)
 
 module("Pseudo-elements CSS OM", {
     setup: function(){
-        createPseudoElements('#host::pseudo-element(1, "before"){ content: "test"}')
+        createPseudoElements('#host::before[1   ]{ content: "test"}')
         CSSPseudoElementsPolyfill.init() 
     },
        
@@ -126,8 +148,8 @@ test("CSSPseudoElementList", function(){
     equal(typeof pseudos.item, 'function', "CSSPseudoElementList should have item() method")
     ok(pseudos.item(0) instanceof CSSPseudoElement, "CSSPseudoElementList.item(0) should be a CSSPseudoElement")
     
-    equal(typeof pseudos.getByOrdinalAndPosition, 'function', "CSSPseudoElementList should have getByOrdinalAndPosition() method")
-    ok(pseudos.getByOrdinalAndPosition(1, 'before') instanceof CSSPseudoElement, "CSSPseudoElementList.getByOrdinalAndPosition(0) should be a CSSPseudoElement")
+    equal(typeof pseudos.getByOrdinalAndType, 'function', "CSSPseudoElementList should have getByOrdinalAndType() method")
+    ok(pseudos.getByOrdinalAndType(1, 'before') instanceof CSSPseudoElement, "CSSPseudoElementList.getByOrdinalAndType(ordinal, type) should be a CSSPseudoElement")
 })
 
 test("window.getPseudoElements()", function(){
