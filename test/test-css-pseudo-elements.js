@@ -101,31 +101,78 @@ test("CSS Cascade with native pseudo-elements", function(){
     teardown()
 })
 
-module("::nth-pseudo")
+module("Pseudo-elements with ::nth-pseudo", {
+    setup: function(){
+        createPseudoElements('\
+            #host::before[1]{ content: "before1"}\
+            #host::before[2]{ content: "before2"}\
+            #host::after[1]{ content: "after1"}\
+            #host::after[2]{ content: "after2"}\
+            \
+            #host::nth-pseudo(before, 1){ color: blue }\
+            #host::nth-pseudo(before, 2){ color: yellow }\
+            #host::nth-pseudo(after, 1){ color: yellow }\
+            #host::nth-pseudo(after, 2){ color: blue }\
+            \
+            #host::nth-pseudo(before, even){ background-color: lime }\
+            #host::nth-pseudo(after, even){ background-color: lime }\
+            \
+            #host::nth-pseudo(before, odd){ background-color: pink }\
+            #host::nth-pseudo(after, odd){ background-color: pink }\
+         ')
+        
+        CSSPseudoElementsPolyfill.init() 
+    },
+    
+    teardown: function(){
+        removePseudoElements()
+    }
+})
 
 test("Get index by query formula", function(){
                                  
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n").call(this, 0) , 0, "2n")
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n").call(this, 1) , 2, "2n") 
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n").call(this, 0) , 0, "2n")
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n").call(this, 1) , 2, "2n") 
 
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n+1").call(this, 0) , 1, "2n+1")
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n+1").call(this, 1) , 3, "2n+1")
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n+1").call(this, 0) , 1, "2n+1")
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n+1").call(this, 1) , 3, "2n+1")
 
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("3n+5").call(this, 1) , 8, "3n+5")
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("3n+5").call(this, 1) , 8, "3n+5")
 
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("0n+0").call(this, 1) , 1, "0n+0") 
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("0n+0").call(this, 1) , 1, "0n+0") 
                                                                  
-// riding over 2n and 2n+1
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("even").call(this, 0) , 0, "even") 
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("odd").call(this, 0) , 1, "odd") 
+    // riding over 2n and 2n+1
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("even").call(this, 0) , 0, "even") 
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("odd").call(this, 0) , 1, "odd") 
 
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("even").call(this, 1) , 2, "even") 
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("odd").call(this, 1) , 3, "odd") 
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("even").call(this, 1) , 2, "even") 
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("odd").call(this, 1) , 3, "odd") 
 
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("1").call(this, 1) , 1)
-equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("3").call(this, 3) , 3)
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("1").call(this, 1) , 1)
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("3").call(this, 3) , 3)
 
+}) 
+
+test("::nth-pseudo with index", function(){
+    var host = document.querySelector("#host")
+    var pseudos = host.querySelectorAll("[data-pseudo-element]")
+    
+    equal(pseudos[0].style.color, "blue", "First 'before' pseudo-element should have color blue")
+    equal(pseudos[1].style.color, "yellow", "Second 'before' pseudo-element should have color yellow")
+    equal(pseudos[2].style.color, "yellow", "First 'after' pseudo-element should have color yellow")
+    equal(pseudos[3].style.color, "blue", "Second 'after' pseudo-element should have color blue")
 })
+
+test("::nth-pseudo with odd/even", function(){
+    var host = document.querySelector("#host")
+    var pseudos = host.querySelectorAll("[data-pseudo-element]")
+    
+    equal(pseudos[0].style['backround-color'], "pink", "First 'before' pseudo-element should have pink background")
+    equal(pseudos[1].style['backround-color'], "lime", "Second 'before' pseudo-element should have lime background")
+    equal(pseudos[2].style['backround-color'], "pink", "First 'after' pseudo-element should have pink background")
+    equal(pseudos[3].style['backround-color'], "lime", "Second 'after' pseudo-element should have lime background")
+})
+
 
 module("Pseudo-elements CSS OM", {
     setup: function(){
