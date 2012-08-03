@@ -26,7 +26,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <meta charset="UTF-8">
     <style type="text/experimental-css">     
     
-        div::pseudo-element(1, "before"){
+        div::before[1]{
             content: "“";
             font-family: Times;
             font-size: 350%;
@@ -36,7 +36,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             color: papayawhip;
         } 
         
-        div::pseudo-element(1, "after"){
+        div::after[1]{
             content: "”";   
             font-family: Times;
             font-size: 350%;  
@@ -46,7 +46,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             color: papayawhip;
         }
          
-        div::pseudo-element(2, "after"){
+        div::after[2]{
             content: ".";   
             position: absolute;
             bottom: -10px;

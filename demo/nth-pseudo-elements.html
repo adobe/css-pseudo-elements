@@ -27,52 +27,52 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <meta charset="UTF-8">          
     <style type="text/experimental-css">     
     
-        div::pseudo-element(1, "before"){
+        div::before[1]{
             content: "C";
         }
         
-        div::pseudo-element(2, "before"){
+        div::before[2]{
             content: "B";
         }
         
-        div::pseudo-element(5, "before"){
+        div::before[5]{
             content: "A";  
         }  
         
-        div::pseudo-element(1, "after"){
+        div::after[1]{
             content: "D";
         }
 
-        div::pseudo-element(2, "after"){
+        div::after[2]{
             content: "E";
         }
         
-        div::pseudo-element(5, "after"){
+        div::after[5]{
             content: "F";
         } 
         
 
-        div::nth-pseudo-element(3, "before"){
+        div::nth-pseudo(before, 3){
             color: red;
         } 
         
-        div::nth-pseudo-element(2, "before"){
+        div::nth-pseudo(before, 2){
             color: yellow;
         }    
         
-        div::nth-pseudo-element(1, "before"){
+        div::nth-pseudo(before, 1){
             color: blue;   
         }    
 
-        div::nth-pseudo-element(1, "after"){
+        div::nth-pseudo(after, 1){
             color: blue;
         }
                 
-        div::nth-pseudo-element(2, "after"){
+        div::nth-pseudo(after, 2){
             color: yellow;
         }
         
-        div::nth-pseudo-element(3, "after"){
+        div::nth-pseudo(after, 3){
             color: red;
         }  
                 

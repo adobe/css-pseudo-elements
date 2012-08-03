@@ -27,7 +27,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <meta charset="UTF-8">          
     <style type="text/experimental-css">     
     
-        body::pseudo-element(1, "before"){
+        body::before[1]{
             -webkit-flow-from: article;
             display: block;
             width: 50%;
@@ -35,14 +35,14 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             outline: 1px solid green;
         }
          
-        body::pseudo-element(2, "before"){
+        body::before[2]{
             -webkit-flow-from: article;
             display: block;
             width: 50%;
             height: 3.6em;  
             outline: 1px solid green;
         }
-        body::pseudo-element(1, "after"){
+        body::after[1]{
             -webkit-flow-from: article;
             display: block;
             width: 50%;

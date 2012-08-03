@@ -33,8 +33,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	    _config = {
 			styleType: "text/experimental-css",
 			pseudoPositions: "before after letter line".split(" "),
-			pseudoElementSelectorRegex: /((?:nth-(?:last-)?)?pseudo-element)\s*\(\s*([\d\w\+\-]+)\s*,\s*[\"\']\s*(\w+)\s*[\"\']\)/i,
-			pseudoElementSelectorRegexSimple: /^(before|after)$/ 
+            // pseudoElementSelectorRegex: /((?:nth-(?:last-)?)?pseudo-element)\s*\(\s*([\d\w\+\-]+)\s*,\s*[\"\']\s*(\w+)\s*[\"\']\)/i,
+			pseudoElementSelectorRegexSimple: /^(before|after)(?:\[(\d+)\])?$/i 
 		}
 		
 		
@@ -64,10 +64,10 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		Create a CSSPseudoElement object.
 		
 		@param {Integer} ordinal The oridinal of the pseudo-element shoud be a positive integer
-		@param {String} postition The position of the pseudo-element should be one of: "before","after","letter" or "line"
+		@param {String} type The type of the pseudo-element should be one of: "before","after","letter" or "line"
 		@param {Object} style The CSS style properties of the pseudo-element
 	*/	  
-	function CSSPseudoElement(ordinal, position, style){
+	function CSSPseudoElement(ordinal, type, style){
 		var cssText = []     
 				
         // pseudos need to have either content of flow-from		
@@ -79,7 +79,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		var mock = document.createElement("span")
 		mock.setAttribute("data-pseudo-element","")
 		mock.setAttribute("data-ordinal", ordinal)
-		mock.setAttribute("data-position", position)
+		mock.setAttribute("data-type", type)
 		                    
 		if (style['content']){                 
 			mock.textContent = style['content']
@@ -92,7 +92,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		mock.setAttribute("style", cssText.join(";") )
 		 
 		this.ordinal = ordinal
-		this.position = position
+		this.type = type
 		this.style = style 
 		this.src = mock
 		
@@ -119,19 +119,33 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }) 
     
         return match.length ? match.pop() : null
+    }
+    
+    function getPseudoElementCSSRule(cssRule, ruleType, host, type, ordinal){
+
+        // Convert native CSSStyleRule to CSSRule.
+        // Native pseudo-elements come across as CSSStyleRule
+        if (cssRule instanceof CSSStyleRule && typeof cssRule.cssText == 'string'){
+            cssRule = _parser.parseCSSDeclaration(cssRule.cssText)
+        }        
+		
+        // Native pseudo-elements don't have an ordinal. Default to ordinal = 1
+		cssRule.ordinal = ordinal ? parseInt(ordinal, 10) : 1
+        cssRule.type = type
+        cssRule.hostSelectorText = host 
+        cssRule.pseudoSelectorType = ruleType 
+        
+		// Rewrite the selector text to make it uniform across all pseudo-element rules
+        // Necessary when doing CSS cascade and comparison
+		cssRule.setSelector([host, "::", cssRule.type , "[", cssRule.ordinal, "]"].join('')) 
+		
+ 	    return cssRule
     }    
 	
 	function CSSPseudoElementRule(cssRule){
-	             
-	    /*
-	        Generate uniform selector text for pseudo-elements
-	        Necessary when doing CSS cascade and comparison
-	    */
-	    function getSelectorText(host, pseudo, ordinal, position){
-	        return  [host, "::", pseudo , "(", ordinal, ', \"', position , '\"' , ")"].join('') 
-	    }
-	    
-		var data, 
+
+		var rule, 
+		    data, 
 			ordinal,
 			position,
 			hostSelectorText,
@@ -142,100 +156,75 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		if (parts.length < 2 || parts.length > 2 || parts[0].indexOf(":") > 0){
 			throw new Error("Invalid pseudo-element selector " + cssRule.selectorText)
 		}
-		
+
+		// selector of the pseudo-element's host element
 		hostSelectorText = parts[0]
 
-		/* See if the selector is simple ::before or ::after
-		   data[1] = position, should be one of:
-				before
-				after
-		*/		  
+ 	    /*
+ 	        Match pseudo-element selectors
+ 	        data[1] -> type: before | after
+ 	        data[2] -> ordinal
+ 	    */
 		data = parts[1].match(_config.pseudoElementSelectorRegexSimple)
-					   
-		// simple ::before or ::after match. convert it to ::pseudo-element
-		if (data && data[1]){
-		    
-			// make a CSSRule out of the real pseudo-element css declaration
-			var newRule = _parser.parseCSSDeclaration(cssRule.cssText) 
-			if (!newRule){
-			    return
-			}         
-			
-			newRule.ordinal = 1
-			newRule.position = data[1]
-			newRule.pseudoSelectorType = "pseudo-element"
-            newRule.hostSelectorText = hostSelectorText 
-			
-			// rewrite the selector text
-			newRule.selectorText = getSelectorText(newRule.hostSelectorText, newRule.pseudoSelectorType, newRule.ordinal, newRule.position)
-			
-			return newRule
+
+		if (data && data[1]){   
+		    rule = getPseudoElementCSSRule(cssRule, "pseudo-element", parts[0], data[1], data[2])
 		}
-		else{
+		else{   
 			/* 
 				Attempt to extract the pseudo ordinal and position
 				data[1] = pseudo-element selector, should be one of:
-					pseudo-element
 					nth-pseudo-element
 					nth-last-pseudo-element								 
 
 				data[2] = ordinal, should be positive integer
 
-				data[3] = position, should be one of:
+				data[3] = type, should be one of:
 					before
 					after
 					letter
 					line
 			*/
-			data = parts[1].match(_config.pseudoElementSelectorRegex)
-			 
-			if (!data || !data.length || data.length < 4){	
-				throw new Error("Invalid pseudo-element selector " + cssRule.selectorText)
-			}
-		} 
-		 
-		pseudoSelectorType = data[1] 
-		ordinal = data[2] 
-		position = data[3]
-		
-		// the selector for the host element
-		cssRule.hostSelectorText = hostSelectorText
-		cssRule.pseudoSelectorType = pseudoSelectorType
-		cssRule.position = position 
-													
-		if (_config.pseudoPositions.indexOf(position) < 0){
-			throw new Error("Invalid pseudo-element position: " + position + ". Expected one of: " + _config.pseudoPositions.join(", ") )			
-		}	  
-		
-		// TODO: make me cleaner!
-		switch(pseudoSelectorType){		  
-			
-			// pseudo-elements have ordinal (integer) and position
-			case "pseudo-element": 
-			
-			    var ordinalAsNumber = parseInt(ordinal, 10)
-			
-				// ordinals need to be ONLY positive numbers, larger than 0
-				if (/\D/.test(ordinal) || isNaN(ordinalAsNumber) || ordinalAsNumber < 1){
-					throw new Error("Invalid pseudo-element ordinal: " + ordinal + ". Expected positive integer")			 
-				}
-			
-				cssRule.ordinal = ordinalAsNumber
-				cssRule.selectorText = getSelectorText(cssRule.hostSelectorText, cssRule.pseudoSelectorType, cssRule.ordinal, cssRule.position)
-				
-			break
-										
-			// nth-pseudo-elements have an index (an+b)|odd|even and position
-			case "nth-pseudo-element":
-			case "nth-last-pseudo-element": 
-			
-				cssRule.index = data[2] 
-				cssRule.queryFn = getIndexQueryFunction(data[2])           
-				
-			break
+            data = parts[1].match(_config.pseudoElementSelectorRegex)
+             
+            if (!data || !data.length || data.length < 4){   
+             throw new Error("Invalid pseudo-element selector " + cssRule.selectorText)
+            }
+            
+            
+            // rule = getPseudoElementCSSRule("pseudo-element", cssRule.cssText, parts[0], data[1], data[2])
+		    
 		}
 		
-		return cssRule
+		return rule 
+		 
+        // pseudoSelectorType = data[1] 
+        // ordinal = data[2] 
+        // position = data[3]
+        // 
+        // // the selector for the host element
+        // cssRule.hostSelectorText = hostSelectorText
+        // cssRule.pseudoSelectorType = pseudoSelectorType
+        // cssRule.position = position 
+        //                                          
+        // if (_config.pseudoPositions.indexOf(position) < 0){
+        //  throw new Error("Invalid pseudo-element position: " + position + ". Expected one of: " + _config.pseudoPositions.join(", ") )           
+        // }      
+        // 
+        // // TODO: make me cleaner!
+        // switch(pseudoSelectorType){        
+        //  
+        //  // nth-pseudo-elements have an index (an+b)|odd|even and position
+        //  case "nth-pseudo-element":
+        //  case "nth-last-pseudo-element": 
+        //  
+        //      cssRule.index = data[2] 
+        //      cssRule.queryFn = getIndexQueryFunction(data[2])           
+        //      
+        //  break
+        // }
+        // 
+        // return cssRule
 	}
 	
 	function getIndexQueryFunction(query){
@@ -314,7 +303,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	        
 	    // group rules by hostSelectorText
 	    // TODO: remvoe this step and merge with nth-pseudo grouping
-	    groups = groupByHostSelector(cssRules)
+	    groups = groupByHostSelector(cssRules) 
 	    
 	    for (host in groups){              
 	        for (position in groups[host]){
@@ -325,16 +314,24 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	    }
 	}
 	
-	function createPseudoElement(rule){
-	     var pseudoElement = new CSSPseudoElement(rule.ordinal, rule.position, rule.style),
-				host = document.querySelector(rule.hostSelectorText)
-
-			// become parasitic. 
+	/*
+	    Create pseudo-elements and attach them to the corresponding host element.
+	    @param {CSSPseudoElementRule} rule The rule according to which to create the pseudo-element
+	*/
+	function createPseudoElement(rule){     
+	    
+	    var pseudoElement,
+	        hosts = document.querySelectorAll(rule.hostSelectorText)
+			 	
+		Array.prototype.forEach.call(hosts, function(host){
+		    pseudoElement = new CSSPseudoElement(rule.ordinal, rule.type, rule.style)
+		    
+		    // become parasitic. 
     		// Attach pseudo elements objects to the host node
     		host.pseudoElements = host.pseudoElements || [] 
     		host.pseudoElements.push(pseudoElement)	 
 
-    		switch(pseudoElement.position){
+    		switch(pseudoElement.type){
     			case "before":
     				if (host.firstChild){
     					host.insertBefore(pseudoElement.src, host.firstChild)
@@ -348,10 +345,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     				host.appendChild(pseudoElement.src)
     			break
     		}
+		})	
 	}
 	
 	/*
-	    Group an array of CSSPseudoElementRule items into separate arrays by their hostSelectorText and position
+	    Group an array of CSSPseudoElementRule items into separate arrays by their hostSelectorText and type
 	    Sort rules by ordinal
 	    
 	    @param {Array} cssRules Array of CSSPseudoElementRule items
@@ -371,7 +369,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		        }
             }    
 		    
-            groups[rule.hostSelectorText][rule.position].push(rule)
+            groups[rule.hostSelectorText][rule.type].push(rule)
         })
         
         for (host in groups){              
@@ -557,23 +555,27 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             catch(e){}
 		})  
 		
-		goodRules = pseudoRules.filter(function(rule){
-			return rule.pseudoSelectorType === "pseudo-element"
-		})        
+		pseudoRules = _parser.cascade(pseudoRules) 
 		
-		// cascade real and prototype pseudo-element rules
-        goodRules = _parser.cascade(goodRules)
-		 
-		nthRules = pseudoRules.filter(function(rule){
-		    return /nth-(?:last-)?pseudo-element/i.test(rule.pseudoSelectorType)
-		})
-		
-        goodRules = processNthPseudoElementRules(goodRules, nthRules)
-		
-		// cascade prototype pseudo-element rules generated by nth-pseudo matching
-        goodRules = _parser.cascade(goodRules) 
-        
-		createPseudoElements(goodRules)
+        // goodRules = pseudoRules.filter(function(rule){
+        //  return rule.pseudoSelectorType === "pseudo-element"
+        // })                                  
+        // 
+        // 
+        // // cascade real and prototype pseudo-element rules
+        //         goodRules = _parser.cascade(goodRules)
+        //  
+        // nthRules = pseudoRules.filter(function(rule){
+        //     return /nth-(?:last-)?pseudo-element/i.test(rule.pseudoSelectorType)
+        // })
+        // 
+        //         goodRules = processNthPseudoElementRules(goodRules, nthRules)
+        // 
+        // // cascade prototype pseudo-element rules generated by nth-pseudo matching
+        //         goodRules = _parser.cascade(goodRules) 
+        //                              
+                             
+		createPseudoElements(pseudoRules)
 	}
 	
 	scope.CSSPseudoElementList = CSSPseudoElementList
