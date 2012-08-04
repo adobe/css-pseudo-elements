@@ -123,7 +123,45 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return match.length ? match.pop() : null
     }
     
-    function NthPseudoElementCSSRule(cssRule){
+	function PseudoElementCSSRule(cssRule){
+		var data, 
+			parts = cssRule.selectorText.split("::")
+
+ 	    this.hostSelectorText = parts[0] 
+
+ 	    /*
+ 	        Match pseudo-element selectors
+ 	        data[1] -> type: before | after
+ 	        data[2] -> ordinal
+ 	    */
+		data = parts[1].match(_config.regex.pseudoElementSelector)
+
+		if (data && data[1]){
+		    
+		    // Convert native CSSStyleRule to CSSRule.
+            // Native pseudo-elements come across as CSSStyleRule
+            if (cssRule instanceof CSSStyleRule && typeof cssRule.cssText == 'string'){
+                cssRule = _parser.parseCSSDeclaration(cssRule.cssText)
+            }     
+            
+            // import all the CSSRule properties
+            for (var key in cssRule){
+                this[key] = cssRule[key]
+            }   
+                 
+            this.pseudoSelectorType = "pseudo-element"
+
+            // Native pseudo-elements don't have an ordinal. Default to ordinal = 1
+    		this.ordinal = data[2] ? parseInt(data[2], 10) : 1
+            this.type = data[1]
+
+    		// Rewrite the selector text to make it uniform across all pseudo-element rules
+            // Necessary when doing CSS cascade and comparison
+    		this.setSelector([this.hostSelectorText, "::", this.type , "[", this.ordinal, "]"].join(''))
+		}
+	}
+	
+	function NthPseudoElementCSSRule(cssRule){
         var data, 
             parts = cssRule.selectorText.split("::")
             
@@ -166,44 +204,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             this.queryFn = getIndexQueryFunction(this.index)
         }    
     }
-	
-	function PseudoElementCSSRule(cssRule){
-		var data, 
-			parts = cssRule.selectorText.split("::")
-
- 	    this.hostSelectorText = parts[0] 
-
- 	    /*
- 	        Match pseudo-element selectors
- 	        data[1] -> type: before | after
- 	        data[2] -> ordinal
- 	    */
-		data = parts[1].match(_config.regex.pseudoElementSelector)
-
-		if (data && data[1]){
-		    
-		    // Convert native CSSStyleRule to CSSRule.
-            // Native pseudo-elements come across as CSSStyleRule
-            if (cssRule instanceof CSSStyleRule && typeof cssRule.cssText == 'string'){
-                cssRule = _parser.parseCSSDeclaration(cssRule.cssText)
-            }     
-            
-            // import all the CSSRule properties
-            for (var key in cssRule){
-                this[key] = cssRule[key]
-            }   
-                 
-            this.pseudoSelectorType = "pseudo-element"
-
-            // Native pseudo-elements don't have an ordinal. Default to ordinal = 1
-    		this.ordinal = data[2] ? parseInt(data[2], 10) : 1
-            this.type = data[1]
-
-    		// Rewrite the selector text to make it uniform across all pseudo-element rules
-            // Necessary when doing CSS cascade and comparison
-    		this.setSelector([this.hostSelectorText, "::", this.type , "[", this.ordinal, "]"].join(''))
-		}
-	}
 	
 	function getIndexQueryFunction(query){
 	    
@@ -404,6 +404,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     		})             
 
     		// reversing array in order to delete from the end
+    		// removing rules mutates the array so we need to make sure we're deleting the right indexes
     		ruleIndexToDelete.reverse().forEach(function(ruleIndex){
                 sheet.removeRule(ruleIndex)
     		})
@@ -486,6 +487,31 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         })
         
         return matchedRules
+	} 
+	 
+	/*
+	    Take an array of pseudo-element CSSRules and try to convert them to experimental pseudo-element CSS rules/
+	    Return an arra of experimental pseudo-element CSS rules. The input and output array may not have the same length.
+	    
+	    @param {Array} cssRules
+	    @param {Function} ruleConstructor The constructor to use when generating an experimental CSS rule
+	                                      can be one of: 
+	                                      - PseudoElementCSSRule 
+	                                      - NthPseudoElementCSSRule
+	                                      
+	    @return {Array} Array of experimetal CSSRules as defined by the ruleConstructor
+	*/
+	function getExperimentalCSSRules(cssRules, ruleConstructor){
+	    var newRule
+	    
+	    return cssRules.reduce(function(memo, rule){ 
+		    newRule = new ruleConstructor(rule)   
+		    
+		    if (newRule.type){
+		        memo.push(newRule)
+		    }                     
+		    return memo
+		}, [])
 	}
 	
 	function init(){ 
@@ -516,25 +542,21 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			return
 		}   
 		
-		pseudoRules = cssRules.reduce(function(memo, rule){ 
-		    var pseudoRule = new PseudoElementCSSRule(rule)
-		    if (pseudoRule.type){
-		        memo.push(pseudoRule)
-		    }                     
-		    return memo
-		}, []) 
+		// get valid PseudoElementCSSRules (ex: matching ::before[ordinal])
+		pseudoRules = getExperimentalCSSRules(cssRules, PseudoElementCSSRule) 
+
+		// get valid NthPseudoElementCSSRules (ex: matching ::nth-pseudo(before, index))
+		nthRules = getExperimentalCSSRules(cssRules, NthPseudoElementCSSRule)
+				
+		if (!pseudoRules.length){
+		    // The fun's over!
+		    return
+		}
 
         pseudoRules = _parser.cascade(pseudoRules) 		
-		
-		nthRules = cssRules.reduce(function(memo, rule){
-		    var nthRule = new NthPseudoElementCSSRule(rule)
-		    if (nthRule.type){
-		        memo.push(nthRule)
-		    }
-		    return memo
-		}, []) 
-		
-		if (nthRules.length){
+
+		if (nthRules.length){   
+		    
 		    nthRules = _parser.cascade(nthRules)   
             
             // match rules by nth-pseudo and generate rules to overwrite them accordingly
@@ -549,7 +571,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	
 	scope.CSSPseudoElementList = CSSPseudoElementList
 	scope.CSSPseudoElement = CSSPseudoElement
-	
+
+    // polyfill to expose bits for unit testing
 	scope.CSSPseudoElementsPolyfill = (function(){
 		return {
 			init: init,
