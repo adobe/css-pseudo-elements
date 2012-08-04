@@ -109,16 +109,16 @@ module("Pseudo-elements with ::nth-pseudo", {
             #host::after[1]{ content: "after1"}\
             #host::after[2]{ content: "after2"}\
             \
-            #host::nth-pseudo(before, 1){ color: blue }\
-            #host::nth-pseudo(before, 2){ color: yellow }\
-            #host::nth-pseudo(after, 1){ color: yellow }\
-            #host::nth-pseudo(after, 2){ color: blue }\
+            #host::nth-pseudo(before, 1){ color: yellow }\
+            #host::nth-pseudo(before, 2){ color: blue }\
+            #host::nth-pseudo(after, 1){ color: blue }\
+            #host::nth-pseudo(after, 2){ color: yellow }\
             \
             #host::nth-pseudo(before, even){ background-color: lime }\
             #host::nth-pseudo(after, even){ background-color: lime }\
             \
-            #host::nth-pseudo(before, odd){ background-color: pink }\
-            #host::nth-pseudo(after, odd){ background-color: pink }\
+            #host::nth-pseudo(before, odd){ background-color: red }\
+            #host::nth-pseudo(after, odd){ background-color: red }\
          ')
         
         CSSPseudoElementsPolyfill.init() 
@@ -157,26 +157,26 @@ test("::nth-pseudo with index", function(){
     var host = document.querySelector("#host")
     var pseudos = host.querySelectorAll("[data-pseudo-element]")
     
-    equal(pseudos[0].style.color, "blue", "First 'before' pseudo-element should have color blue")
-    equal(pseudos[1].style.color, "yellow", "Second 'before' pseudo-element should have color yellow")
-    equal(pseudos[2].style.color, "yellow", "First 'after' pseudo-element should have color yellow")
-    equal(pseudos[3].style.color, "blue", "Second 'after' pseudo-element should have color blue")
+    equal(pseudos[0].style.color, "blue", "Second 'before' pseudo-element should have color blue")
+    equal(pseudos[1].style.color, "yellow", "First 'before' pseudo-element should have color yellow")
+    equal(pseudos[2].style.color, "blue", "First 'after' pseudo-element should have color yellow")
+    equal(pseudos[3].style.color, "yellow", "Second 'after' pseudo-element should have color blue")
 })
 
 test("::nth-pseudo with odd/even", function(){
     var host = document.querySelector("#host")
-    var pseudos = host.querySelectorAll("[data-pseudo-element]")
+    var pseudos = host.querySelectorAll("[data-pseudo-element]") 
     
-    equal(pseudos[0].style['backround-color'], "pink", "First 'before' pseudo-element should have pink background")
-    equal(pseudos[1].style['backround-color'], "lime", "Second 'before' pseudo-element should have lime background")
-    equal(pseudos[2].style['backround-color'], "pink", "First 'after' pseudo-element should have pink background")
-    equal(pseudos[3].style['backround-color'], "lime", "Second 'after' pseudo-element should have lime background")
+    equal(pseudos[0].style['background-color'], "lime", "Second 'before' pseudo-element should have lime background")
+    equal(pseudos[1].style['background-color'], "red", "First 'before' pseudo-element should have pink background")
+    equal(pseudos[2].style['background-color'], "red", "First 'after' pseudo-element should have pink background")
+    equal(pseudos[3].style['background-color'], "lime", "Second 'after' pseudo-element should have lime background")
 })
 
 
 module("Pseudo-elements CSS OM", {
     setup: function(){
-        createPseudoElements('#host::before[1   ]{ content: "test"}')
+        createPseudoElements('#host::before[1]{ content: "test"}')
         CSSPseudoElementsPolyfill.init() 
     },
        
@@ -188,7 +188,7 @@ module("Pseudo-elements CSS OM", {
 test("CSSPseudoElementList", function(){
     var host = document.querySelector("#host")
     var pseudos = window.getPseudoElements(host, "before")
-
+               
     ok(pseudos instanceof CSSPseudoElementList, "window.getPseudoElements() should return a CSSPseudoElementList")
     equal(pseudos.length, 1, "CSSPseudoElementList should have a single item")
 

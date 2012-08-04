@@ -40,23 +40,23 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		}
 		
 		
-	scope.getPseudoElements = function(element, position){
-	    var pseudos 
+	scope.getPseudoElements = function(element, type){
+	    var pseudos                                 
 	    
 		if (!element || element.nodeType !== 1){
 			throw new Error("Invalid parameter 'element'. Expected DOM Node type 1")
-		}
-
-		if (typeof position !== 'string' || _config.pseudoPositions.indexOf(position) < 0){
-			throw new TypeError("Invalid parameter 'position'. Expected one of " + _config.pseudoPositions)
+		}                                              
+		
+		if (typeof type !== 'string' || _config.pseudoPositions.indexOf(type) == -1){
+			throw new TypeError("Invalid parameter 'type'. Expected one of " + _config.pseudoPositions)
 		}    
 		
 		if (!element.pseudoElements){
 		    pseudos = []
-		}                  
+		}                
 		
         pseudos = element.pseudoElements.filter(function(pseudo){
-             return pseudo.position === position
+             return pseudo.type === type
          })                                  
          
 		return new CSSPseudoElementList(pseudos)
@@ -115,9 +115,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         return this[index] || null
     }                             
     
-    CSSPseudoElementList.prototype.getByOrdinalAndPosition = function(ordinal, position){
+    CSSPseudoElementList.prototype.getByOrdinalAndType = function(ordinal, type){
         var match = Array.prototype.filter.call(this, function(pseudo){
-            return pseudo.ordinal === ordinal && pseudo.position === position
+            return pseudo.ordinal === ordinal && pseudo.type === type
         }) 
     
         return match.length ? match.pop() : null
@@ -225,7 +225,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     			operation = parts[3] || "+",
     			modifier = parseInt(parts[4], 10) || 0 
 
-    		// TODO: test the hell out this!			
     		return function(index){
     		   temp = multiplier * index 
 
@@ -280,7 +279,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	    var groups, host, position
 	        
 	    // group rules by hostSelectorText
-	    // TODO: remvoe this step and merge with nth-pseudo grouping
 	    groups = groupByHostSelector(cssRules) 
 	    
 	    for (host in groups){              
@@ -428,7 +426,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 var potentialRules = groups[nthRule.hostSelectorText][nthRule.type]
                 
                 var matchedRules = matchNthPseudoElementRule(potentialRules, nthRule)
-
+                
                 matchedRules.forEach(function(rule){
                     // augment matching rule with CSS properties from the nth-pseudo rule
                     rule.style = _parser.doExtend({}, rule.style, nthRule.style)
@@ -446,7 +444,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	    Find ::pseudo-element rules that match the given ::nth-pseudo or ::nth-last-pseudo rule
 	    The nth-pseudo can match:
 	        a specific index (not ordinal)
-	        odd indexes
+	        indexes
 	        even index, or 
 	        indexes which satisfy an 'an+b' formula
 	        
@@ -462,8 +460,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         
         pseudoRules.forEach(function(rule, index){ 
             
-            var match,             
-                // expecting 1-indexed array in CSS an+b formula
+            var match,  
                 pos = nthRule.queryFn(index + 1),
                 maxIndex = pseudoRules.length - 1
             
@@ -515,7 +512,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	}
 	
 	function init(){ 
-		var cssRules = [], 
+		var	cssRules = [], 
 			pseudoRules = [],
 			nthRules = [],
 			experimentalStyleSheets = document.querySelectorAll('style[type="'+ _config.styleType +'"]')
@@ -523,7 +520,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		if (!experimentalStyleSheets || !experimentalStyleSheets.length){ 
 			console.warn("No stylesheets found. Expected at least one stylesheet with type = "+ _config.styleType)
 			return
-		}		
+		}
+		
+		_parser.clear()		
 	   
 	    // collect rules from experimental stylesheets
 		Array.prototype.forEach.call(experimentalStyleSheets, function(sheet){
