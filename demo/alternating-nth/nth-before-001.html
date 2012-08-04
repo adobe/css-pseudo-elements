@@ -4,22 +4,22 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Color 2nd and 4th befores by index</title>
   <style type="text/experimental-css">
-    p::pseudo-element (3, 'before') {
+    p::before[3] {
       content: "D";
     }
-    p::pseudo-element (4, 'before') {
+    p::before[4] {
       content: "C";             
     }
-    p::pseudo-element (7, 'before') {
+    p::before[7] {
       content: "B";
     }
-    p::pseudo-element (9, 'before') {
+    p::before[9] {
       content: "A";
     }
-    p::nth-pseudo-element (2, 'before') {
+    p::nth-pseudo (before, 2) {
       background-color: lightgreen;
     }        
-    p::nth-pseudo-element (4, 'before') {
+    p::nth-pseudo (before, 4) {
       background-color: lightgreen;
     }        
     

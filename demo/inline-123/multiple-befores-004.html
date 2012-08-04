@@ -4,10 +4,10 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>test multiple befores with spaced ordinals</title>
   <style type="text/experimental-css">
-    p::pseudo-element(10,'before') {
+    p::before[10] {
       content: "2";
     }
-    p::pseudo-element(12,'before') {
+    p::before[12] {
       content: "1";
     }
   </style>

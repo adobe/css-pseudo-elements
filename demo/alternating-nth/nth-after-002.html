@@ -4,21 +4,21 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Color even afters</title>
   <style type="text/experimental-css">
-    p::pseudo-element (3, 'after') {
-      content: "B";
+    p::after[3] {
+        content: "B";
     }
-    p::pseudo-element (4, 'after') {
-      content: "C";
+    p::after[4] {
+        content: "C";
     }
-    p::pseudo-element (7, 'after') {
-      content: "D";
+    p::after[7] {
+        content: "D";
     }
-    p::pseudo-element (9, 'after') {
-      content: "E";
-    }
+    p::after[9] {
+        content: "E";
+    } 
     
-    p::nth-pseudo-element (even, 'after') {
-      background-color: lightgreen;
+    p::nth-pseudo (after, even) {
+        background-color: lightgreen;
     } 
     
   </style>
