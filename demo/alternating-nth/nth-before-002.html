@@ -4,26 +4,23 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>Color even befores</title>
   <style type="text/experimental-css">
-  p::before(3) {
-    content: "D";
-  }
-  p::before(4) {
-    content: "C";             
-  }
-  p::before(7) {
-    content: "B";
-  }
-  p::before(9) {
-    content: "A";
-  }
+    p::before(3) {
+        content: "D";
+    }
+    p::before(4) {
+        content: "C";             
+    }
+    p::before(7) {
+        content: "B";
+    }
+    p::before(9) {
+        content: "A";
+    }  
     
     p::nth-pseudo (before, even) {
-      background-color: lime;
+        background-color: lime;
     }          
     
-    p::nth-pseudo (before, odd) {
-      background-color: pink;
-    }
   </style>
   <style>
     .green {

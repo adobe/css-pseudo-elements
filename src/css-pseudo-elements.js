@@ -221,10 +221,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     		var temp,
     			pattern = /(\d+)?(n)(?:([\+-])(\d+))?/,
     			parts = formula.match(pattern),
-    			multiplier = parseInt(parts[1], 10) || 1,
+    			multiplier = parseInt(parts[1], 10),
+    			multiplier = !isNaN(multiplier) ? multiplier : 1,
     			operation = parts[3] || "+",
     			modifier = parseInt(parts[4], 10) || 0 
-
+    			
     		return function(index){
     		   temp = multiplier * index 
 
@@ -235,32 +236,27 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     		       return temp + modifier
     		   }
     		}	 
-    	} 
+    	}
     	
-	    if (/^\d+$/.test(query) ){
-			
-			queryFn = function(ordinal){
-				return function(index){
-					if (index == ordinal){    
-					    return index
-					} 
-				}
-			}(parseInt(query, 10)) 
-			
+	    if (/^\d+$/.test(query)){
+			queryFn = getQueryFunction("0n+" + query) 
 		}
 		else if(/\d+?n?(\+\d+)?/.test(query)){  
 			queryFn = getQueryFunction(query) 
 		} 
-		else {
-			if (query === "odd"){	   
-				queryFn = getQueryFunction("2n+1")
-			}
-			else if(query === "even"){             
-				queryFn = getQueryFunction("2n") 
-			}
-			else{
-				throw new Error("Invalid pseudo-element index: " + query + ". Expected one of: an+b, odd, even")			  
-			}
+		else {   
+		    switch (query){
+		        case "odd":
+    				queryFn = getQueryFunction("2n+1")                                                                            
+		        break
+
+		        case "even":
+    				queryFn = getQueryFunction("2n")                                                                                  
+		        break
+		        
+		        default:
+    		        throw new Error("Invalid pseudo-element index: " + query + ". Expected one of: an+b, odd, even")			  
+		    }
 		}
 		
 		return queryFn
@@ -460,11 +456,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         
         pseudoRules.forEach(function(rule, index){
             
-            if (nthRule.index == "odd" && index === 0){
-                index = 0
-            } else {
-                index = index + 1
-            } 
+            // if (nthRule.index == "odd"){
+            //     index = index
+            // } else {
+            //     index = index + 1
+            // }     
             
             var match,  
                 pos = nthRule.queryFn(index),

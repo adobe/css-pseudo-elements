@@ -133,23 +133,28 @@ test("Get index by query formula", function(){
                                  
     equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n").call(this, 0) , 0, "2n")
     equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n").call(this, 1) , 2, "2n") 
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n").call(this, 2) , 4, "2n") 
 
     equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n+1").call(this, 0) , 1, "2n+1")
     equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n+1").call(this, 1) , 3, "2n+1")
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("2n+1").call(this, 2) , 5, "2n+1")
 
     equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("3n+5").call(this, 1) , 8, "3n+5")
 
-    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("0n+0").call(this, 1) , 1, "0n+0") 
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("0n+0").call(this, 1) , 0, "0n+0 with 1") 
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("0n+1").call(this, 1) , 1, "0n+1 with 1") 
                                                                  
     // riding over 2n and 2n+1
-    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("even").call(this, 0) , 0, "even") 
     equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("odd").call(this, 0) , 1, "odd") 
-
-    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("even").call(this, 1) , 2, "even") 
     equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("odd").call(this, 1) , 3, "odd") 
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("odd").call(this, 2) , 5, "odd") 
 
-    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("1").call(this, 1) , 1)
-    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("3").call(this, 3) , 3)
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("even").call(this, 0) , 0, "even") 
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("even").call(this, 1) , 2, "even") 
+
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("0").call(this, 0) , 0, "index with 0")
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("1").call(this, 1) , 1, "index with 1")
+    equal(CSSPseudoElementsPolyfill.getIndexQueryFunction("3").call(this, 3) , 3, "index with 3")
 
 }) 
 
@@ -159,8 +164,8 @@ test("::nth-pseudo with index", function(){
     
     equal(pseudos[0].style.color, "blue", "Second 'before' pseudo-element should have color blue")
     equal(pseudos[1].style.color, "yellow", "First 'before' pseudo-element should have color yellow")
-    equal(pseudos[2].style.color, "blue", "First 'after' pseudo-element should have color yellow")
-    equal(pseudos[3].style.color, "yellow", "Second 'after' pseudo-element should have color blue")
+    equal(pseudos[2].style.color, "blue", "First 'after' pseudo-element should have color blue")
+    equal(pseudos[3].style.color, "yellow", "Second 'after' pseudo-element should have color yellow")
 })
 
 test("::nth-pseudo with odd/even", function(){
@@ -168,8 +173,8 @@ test("::nth-pseudo with odd/even", function(){
     var pseudos = host.querySelectorAll("[data-pseudo-element]") 
     
     equal(pseudos[0].style['background-color'], "lime", "Second 'before' pseudo-element should have lime background")
-    equal(pseudos[1].style['background-color'], "red", "First 'before' pseudo-element should have pink background")
-    equal(pseudos[2].style['background-color'], "red", "First 'after' pseudo-element should have pink background")
+    equal(pseudos[1].style['background-color'], "red", "First 'before' pseudo-element should have red background")
+    equal(pseudos[2].style['background-color'], "red", "First 'after' pseudo-element should have red background")
     equal(pseudos[3].style['background-color'], "lime", "Second 'after' pseudo-element should have lime background")
 })
 
