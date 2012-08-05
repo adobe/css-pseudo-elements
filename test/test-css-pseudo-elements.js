@@ -29,15 +29,15 @@ test("Parser exists", function(){
 
 test("Parse basic pseudo-element", function(){
     var parser = new CSSParser()
-    parser.parse("body::before[1]{ content: 'test'} ") 
+    parser.parse("body::before(1){ content: 'test'} ") 
                         
     equal(parser.cssRules.length, 1, "Parse one rule");
-    equal(parser.cssRules[0].selectorText, "body::before[1]", "Parse selector");
+    equal(parser.cssRules[0].selectorText, "body::before(1)", "Parse selector");
 })
 
 test("Parse ::pseudo-element cascade", function(){
     var parser = new CSSParser()
-    parser.parse("body::before[2]{ content: 'test'}; body::before[2]{  color: red } ") 
+    parser.parse("body::before(2){ content: 'test'}; body::before(2){  color: red } ") 
     parser.cascade()
                         
     equal(parser.cssRules.length, 1, "Parse one rule");
@@ -48,11 +48,11 @@ module("Create CSS Pseudo-elements", {
     setup: function(){
         createPseudoElements('\
             #host::before{content: "test"; color: green} \
-            #host::before[1]{ content: "before1"}\
-            #host::before[2]{ content: "before2"}\
+            #host::before(1){ content: "before1"}\
+            #host::before(2){ content: "before2"}\
             #host::after{ content: "test"; color: green}\
-            #host::after[1]{ content: "after1"}\
-            #host::after[2]{ content: "after2"}\
+            #host::after(1){ content: "after1"}\
+            #host::after(2){ content: "after2"}\
          ')
         
         CSSPseudoElementsPolyfill.init() 
@@ -104,10 +104,10 @@ test("CSS Cascade with native pseudo-elements", function(){
 module("Pseudo-elements with ::nth-pseudo", {
     setup: function(){
         createPseudoElements('\
-            #host::before[1]{ content: "before1"}\
-            #host::before[2]{ content: "before2"}\
-            #host::after[1]{ content: "after1"}\
-            #host::after[2]{ content: "after2"}\
+            #host::before(1){ content: "before1"}\
+            #host::before(2){ content: "before2"}\
+            #host::after(1){ content: "after1"}\
+            #host::after(2){ content: "after2"}\
             \
             #host::nth-pseudo(before, 1){ color: yellow }\
             #host::nth-pseudo(before, 2){ color: blue }\
@@ -176,7 +176,7 @@ test("::nth-pseudo with odd/even", function(){
 
 module("Pseudo-elements CSS OM", {
     setup: function(){
-        createPseudoElements('#host::before[1]{ content: "test"}')
+        createPseudoElements('#host::before(1){ content: "test"}')
         CSSPseudoElementsPolyfill.init() 
     },
        

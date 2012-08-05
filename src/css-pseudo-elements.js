@@ -35,7 +35,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			pseudoPositions: "before after letter line".split(" "),
 			regex: {
                 nthPseudoElementSelector: /((?:nth-(?:last-)?)pseudo)\s*\(\s*([^\'\"]\w+)\s*,\s*([\d\w\+\-]+)\s*\)/i,
-    			pseudoElementSelector: /^(before|after)(?:\[(\d+)\])?$/i 
+    			pseudoElementSelector: /^(before|after)(?:\((\d+)\))?$/i 
 			}
 		}
 		
