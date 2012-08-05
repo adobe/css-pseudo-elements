@@ -386,8 +386,8 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		    var ruleIndexToDelete = []
 		    
 		    Array.prototype.forEach.call(sheet.cssRules, function(rule, index){
-		        
-    		    if (rule.selectorText.indexOf("::") > 0){   
+		               
+    		    if (rule.selectorText && rule.selectorText.indexOf("::") > 0){   
                                        
                     // add to the start of the array to be overwritten by experimental styles on CSS Cascade    
                     pseudoRules.unshift(rule)
