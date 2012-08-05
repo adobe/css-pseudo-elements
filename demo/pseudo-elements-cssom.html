@@ -94,11 +94,11 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var pseudoList = window.getPseudoElements(host, "before")
         
         console.log("has CSSPseudoElementList: ", pseudoList instanceof CSSPseudoElementList)
-        console.log("has CSSPseudoElement: ", pseudoList.getByOrdinalAndPosition(1, "before") instanceof CSSPseudoElement)
+        console.log("has CSSPseudoElement: ", pseudoList.getByOrdinalAndType(1, "before") instanceof CSSPseudoElement)
         
-        console.log("CSSPseudoElementList.length: ", pseudoList.length)
-        console.log("CSSPseudoElementList.item(0): ", pseudoList.item(0))
-        console.log("CSSPseudoElementList.getByOrdinalAndPosition(1, \'before\'): ", pseudoList.getByOrdinalAndPosition(1, "before"))
+        console.log("'before' CSSPseudoElementList.length: ", pseudoList.length)
+        console.log("'before' CSSPseudoElementList.item(0): ", pseudoList.item(0))
+        console.log("CSSPseudoElementList.getByOrdinalAndPosition(1, \'before\'): ", pseudoList.getByOrdinalAndType(1, "before"))
         
         console.log('pseudo-elements:')
          
