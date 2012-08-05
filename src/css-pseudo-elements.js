@@ -458,14 +458,20 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	function matchNthPseudoElementRule(pseudoRules, nthRule){
         var matchedRules = []
         
-        pseudoRules.forEach(function(rule, index){ 
+        pseudoRules.forEach(function(rule, index){
+            
+            if (nthRule.index == "odd" && index === 0){
+                index = 0
+            } else {
+                index = index + 1
+            } 
             
             var match,  
-                pos = nthRule.queryFn(index + 1),
+                pos = nthRule.queryFn(index),
                 maxIndex = pseudoRules.length - 1
             
             // JS arrays are 0-indexed
-            pos = pos - 1
+            pos = pos - 1   
             
             switch (nthRule.pseudoSelectorType){
                 case "nth-pseudo":   
