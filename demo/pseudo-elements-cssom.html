@@ -23,74 +23,74 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <html>
 <head>
-    <title>CSS Pseudo-elements Demo</title>
-    <meta charset="UTF-8">          
+    <title>Creating multiple pseudo-elements</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="demo-style.css" media="all" />          
     <style type="text/experimental-css">     
     
-        div::before(1){
-            content: "before1";
-            display: block;   
+        #host::before(1){
+            content: "3";
         }
         
-        div::before(2){
-            content: "before2";
-            color: yellow;
+        #host::before(2){
+            content: "2";
         }
         
-        div::before(5){
-            content: "before5";  
-            color: blue;
-            display: block;
+        #host::before(5){
+            content: "1";  
+        }
+        
+        #host::after(1){
+            content: "A";
         }
 
-        div::after(2){
-            content: "after2";
-            color: yellow;
-            display: block;   
+        #host::after(2){
+            content: "B";
         }
         
-        div::after(5){
-            content: "after5";
-            color: blue;
-            display: block;   
+        #host::after(5){
+            content: "C";
         }
-        
-    </style>
-    <style type="text/css">
-    
-    div{
-        height: 200px;
-        width: 300px;
-        background: lightblue;
-    } 
-    
-    div::before{
-        content: "the real before to be overwritten";
-        color: red;
-        display: block;
-    } 
-    
-    div::after{
-        content: "after1";
-        color: red;
-        display: block;
-    }
-    
+                
     </style>
     <script type="text/javascript" src="../src/css-parser.js"></script>
     <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
 </head>
-<body>   
-    <h1>CSS Pseudo-elements - CSS OM</h1>
-    <p>Check out the page source and browser console output.</p>
+<body> 
+    <h1>Working with CSS Pseudo-elements and JavaScript</h1>                                                    
+
+    <p>
+        Have a look at this page's source code to see the additions to the DOM for working with pseudo-elements. 
+    </p>   
     
-    <div>HOST</div> 
+    <p>
+        <code>window.getPseudoElements(element, type)</code> can be used to get a list of an element's pseudo-elements where:
+    </p>    
+    <ul>
+        <li><code>element</code> is a reference to the host DOM element</li>
+        <li><code>type</code> is either <code>"before"</code> or <code>"after"</code> and represents the type of the pseudo-elements</li>
+    </ul>                                                                                                           
+
+    <p>
+        The demo works correctly if both the 'control' and 'pseudo-elements' sections look exactly the same. Take a look at the source code.
+    </p>       
+    <section>
+        <h2>Control</h2>
+        <div id="control">
+            123 - ABC
+        </div>   
+    </section>
+      
+    <section>
+        <h2>Pseudo-elements</h2>
+        <div id="host"> - </div>  
+    </section>
     
     <script type="text/javascript">
     
     document.addEventListener("DOMContentLoaded", function(e){
         
-        var host = document.querySelector('div')
+        var host = document.querySelector('#host')
         var pseudoList = window.getPseudoElements(host, "before")
         
         console.log("has CSSPseudoElementList: ", pseudoList instanceof CSSPseudoElementList)

@@ -22,11 +22,27 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 --><html>
 <head>
-    <title>Callout/Speech Bubble demo with pseudo-elements</title>
+    <title>Speech bubble with CSS Pseudo-elements</title>
+    <link rel="stylesheet" type="text/css" href="demo-style.css" media="all" />
     <meta charset="UTF-8">
+    <style type="text/css">
+
+        #bubble{      
+            position: relative;
+            background: #111;
+            width: 300px;   
+            font-family: Helvetica, Arial, sans-serif;  
+            padding: 20px 50px;
+            margin: 50px 0; 
+            border-radius: 10px;
+            color: white;
+        }
+    
+    </style> 
+    
     <style type="text/experimental-css">     
     
-        div::before(1){
+        #bubble::before(1){
             content: "“";
             font-family: Times;
             font-size: 350%;
@@ -36,7 +52,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             color: papayawhip;
         } 
         
-        div::after(1){
+        #bubble::after(1){
             content: "”";   
             font-family: Times;
             font-size: 350%;  
@@ -46,7 +62,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             color: papayawhip;
         }
          
-        div::after(2){
+        #bubble::after(2){
             content: ".";   
             position: absolute;
             bottom: -10px;
@@ -62,27 +78,13 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
        }
          
     </style>
-    <style type="text/css">
-    body{
-        font-family: Helvetica, Arial, sans-serif;  
-        margin: 50px;
-    }
-    
-    div{      
-        position: relative;
-        background: #111;
-        width: 300px;
-        padding: 20px 50px; 
-        border-radius: 10px;
-        color: white;
-    }
-    
-    </style>
     <script type="text/javascript" src="../src/css-parser.js"></script>
     <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
 </head>
 <body>      
-    <h1>Callout box using CSS Pseudo-elements</h1>
-    <div>I'm talking about CSS Pseudo-elements.</div>
+    <h1>Speech bubble with CSS Pseudo-elements</h1> 
+    <p>A 'speech bubble' effect can be achieved using multiple pseudo-elements for the quotes and the downwards pointing arrow.</p>
+    
+    <div id="bubble">I'm talking about CSS Pseudo-elements.</div>
 </body>
 </html>

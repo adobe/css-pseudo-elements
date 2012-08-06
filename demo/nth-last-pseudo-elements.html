@@ -23,102 +23,83 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <html>
 <head>
-    <title>CSS Pseudo-elements Demo</title>
+    <title>Selecting with ::nth-last-pseudo Demo</title>
     <meta charset="UTF-8">          
+    <link rel="stylesheet" type="text/css" href="demo-style.css" media="all" />
     <style type="text/experimental-css">     
     
-        div::before(1){
-            content: "C";
+        #host::before(1){
+            content: "3";
         }
         
-        div::before(2){
+        #host::before(2){
+            content: "2";
+        }
+        
+        #host::before(5){
+            content: "1";  
+        }  
+        
+        #host::after(1){
+            content: "A";
+        }
+
+        #host::after(2){
             content: "B";
         }
         
-        div::before(5){
-            content: "A";  
-        }  
-        
-        div::after(1){
-            content: "D";
-        }
-
-        div::after(2){
-            content: "E";
-        }
-        
-        div::after(5){
-            content: "F";
+        #host::after(5){
+            content: "C";
         } 
-        
 
-        div::nth-last-pseudo(before, 3){
+        #host::nth-last-pseudo(before, 3){
             color: blue;
         } 
         
-        div::nth-last-pseudo(before, 2){
+        #host::nth-last-pseudo(before, 2){
             color: yellow;
         }    
         
-        div::nth-last-pseudo(before, 1){
+        #host::nth-last-pseudo(before, 1){
             color: red;   
         }    
 
-        div::nth-last-pseudo(after, 1){
+        #host::nth-last-pseudo(after, 1){
             color: red;
         }
                 
-        div::nth-last-pseudo(after, 2){
+        #host::nth-last-pseudo(after, 2){
             color: yellow;
         }
         
-        div::nth-last-pseudo(after, 3){
+        #host::nth-last-pseudo(after, 3){
             color: blue;
         }  
                 
-    </style>
-    <style type="text/css">
-    
-    div,p{
-        padding: 20px;
-        width: 300px;
-        background: lightblue;
-    }
-    
-    div::before{
-        color: red;
-    }
-    
-    div::after{
-        color: red;
-    }         
-    
-    .red{
-        color: red;
-    }             
-    
-    .yellow{
-        color: yellow;
-    }                
-    
-    .blue{
-        color: blue;
-    }
-    
     </style>
     <script type="text/javascript" src="../src/css-parser.js"></script>
     <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
 </head>
 <body>   
-    <h1>Test ::nth-last-pseudo-element</h1>
-    <strong>Control</strong>
+    <h1>Selecting with ::nth-last-pseudo</h1>
     <p>
-        <span class="red">A</span><span class="yellow">B</span><span class="blue">C</span>
-        <span>-</span>
-        <span class="blue">D</span><span class="yellow">E</span><span class="red">F</span>
-    </p> 
-    
-    <strong>Result</strong>
-    <div> - </div>  
+         The <code>::nth-last-pseudo</code> selector matches from the end of the matched pseudo-elements list. It can match pseudo-elements by a specific index (not ordinal), <code>odd</code>, <code>even</code> or an+b formula (e.g.: 2n+1).
+    </p>
+    <p>
+        The demo works correctly if both the 'control' and 'pseudo-elements' sections look exactly the same. Take a look at the source code.
+    </p>       
+    <section>
+        <h2>Control</h2>
+        <div id="control">
+            <span class="red">1</span><span class="yellow">2</span><span class="blue">3</span>
+            <span>-</span>
+            <span class="blue">A</span><span class="yellow">B</span><span class="red">C</span>
+        </div>   
+    </section>
+      
+    <section>
+        <h2>Pseudo-elements</h2>
+        <div id="host"> - </div>  
+    </section>
 </body>
 </html>
