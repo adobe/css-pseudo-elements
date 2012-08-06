@@ -23,68 +23,68 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <html>
 <head>
-    <title>CSS Pseudo-elements Demo</title>
-    <meta charset="UTF-8">          
+    <title>Creating multiple pseudo-elements</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="demo-style.css" media="all" />          
     <style type="text/experimental-css">     
     
-        div::before(1){
-            content: "before1";
-            display: block;   
+        #host::before(1){
+            content: "3";
         }
         
-        div::before(2){
-            content: "before2";
-            color: yellow;
+        #host::before(2){
+            content: "2";
         }
         
-        div::before(5){
-            content: "before5";  
-            color: blue;
-            display: block;
+        #host::before(5){
+            content: "1";  
+        }
+        
+        #host::after(1){
+            content: "A";
         }
 
-        div::after(2){
-            content: "after2";
-            color: yellow;
-            display: block;   
+        #host::after(2){
+            content: "B";
         }
         
-        div::after(5){
-            content: "after5";
-            color: blue;
-            display: block;   
+        #host::after(5){
+            content: "C";
         }
                 
-    </style>
-    <style type="text/css">
-    
-    div{
-        height: 200px;
-        width: 300px;
-        background: lightblue;
-    } 
-    
-    div::before{
-        content: "the real before to be overwritten";
-        color: red;
-        display: block;
-    }
-    
-    div::after{
-        content: "after1";
-        color: red;
-        display: block;
-    }         
-    
-    [data-pseudo-element]{
-        display: inline;
-    }
-    
     </style>
     <script type="text/javascript" src="../src/css-parser.js"></script>
     <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
 </head>
 <body> 
-    <div>HOST</div>  
+    <h1>Creating multiple pseudo-elements</h1>
+    <p>
+        Multiple pseudo-elements can be created with the <code>::before(ordinal)</code> and <code>::after(ordinal)</code> notation, where 'ordinal' is a positive integer. 
+    </p>   
+        
+    
+    <ul>
+        <li>
+            <code>::before</code> pseudo-elements are ordered <strong>descending</strong> by 'ordinal' from the host element's content edge.
+        </li>
+        <li>
+             <code>::after</code> pseudo-elements are ordered <strong>ascending</strong> by 'ordinal' from the host element's content edge.
+        </li>
+    </ul>
+
+    <p>
+        The demo works correctly if both the 'control' and 'pseudo-elements' sections look exactly the same. Take a look at the source code.
+    </p>       
+    <section>
+        <h2>Control</h2>
+        <div id="control">
+            123 - ABC
+        </div>   
+    </section>
+      
+    <section>
+        <h2>Pseudo-elements</h2>
+        <div id="host"> - </div>  
+    </section>  
 </body>
 </html>

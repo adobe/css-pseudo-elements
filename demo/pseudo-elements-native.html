@@ -23,52 +23,62 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
 <html>
 <head>
-    <title>CSS Pseudo-elements as regions</title>
-    <link rel="stylesheet" type="text/css" href="demo-style.css" media="all" />
-    <meta charset="UTF-8">          
+    <title>CSS pseudo-elements and native ::before/::after</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="demo-style.css" media="all" />          
+    
+    <style type="text/css">
+     
+        #host::before{
+            content: "3";
+        }  
+    
+        #host::after{
+            content: "A";
+        }
+    
+    </style>  
+    
     <style type="text/experimental-css">     
     
-        body::after(1){
-            -webkit-flow-from: article;
-            display: block;
-            float: left;  
-            width: 45%;
-            padding: 2.5%;
-            height: 9em;   
-            background: #ebebeb;
+        #host::before(2){
+            content: "2";
         }
         
-        body::after(2){
-            -webkit-flow-from: article;
-            display: block;
-            float: left;
-            margin-left: 2.5%;
-            width: 20%;
-            padding: 2.5%;
-            height: 9em;   
-            background: #ebebeb;
+        #host::before(5){
+            content: "1";  
         }
-
-    </style>
-    <style type="text/css">
-    
-    h1, article{
-        -webkit-flow-into: article;   
-        margin: 0 0 1em;
-    }
-    
-    body{
-        width: 80%;
-    } 
-    
+        
+        #host::after(2){
+            content: "B";
+        }
+        
+        #host::after(5){
+            content: "C";
+        }
+                
     </style>
     <script type="text/javascript" src="../src/css-parser.js"></script>
     <script type="text/javascript" src="../src/css-pseudo-elements.js"></script>
 </head>
 <body> 
-    <h1>CSS Pseudo-elements as regions</h1> 
-    <article>
-        <p>CSS Regions are a prime candidate for pseudo-elements. This content is rendered in a series of pseudo-element boxes on the body element. No other elements were used for this region chain.</p>
-    </article>
+    <h1>CSS pseudo-elements and native ::before/::after</h1>
+    <p>
+        The native <code>::before</code> and <code>::before(1)</code> identify the same pseudo-element; likewise for <code>::after</code> and <code>::after(1)</code>.
+    </p>
+    <p>
+        The demo works correctly if both the 'control' and 'pseudo-elements' sections look exactly the same. Take a look at the source code.
+    </p>       
+    <section>
+        <h2>Control</h2>
+        <div id="control">
+            123 - ABC
+        </div>   
+    </section>
+      
+    <section>
+        <h2>Pseudo-elements</h2>
+        <div id="host"> - </div>  
+    </section>  
 </body>
 </html>
